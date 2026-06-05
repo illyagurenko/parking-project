@@ -8,7 +8,7 @@ create table cars
 (
     id         serial primary key,
     number_car varchar(9) not null unique,
-    clients_id integer references clients (id)  on delete set null unique
+    clients_id integer references clients (id)  on delete set null
 );
 
 create table parking_spaces
@@ -20,8 +20,8 @@ create table parking_spaces
 create table reservations
 (
     id         serial primary key,
-    parking_id integer references parking_spaces (id) on delete cascade unique,
-    car_id     integer references cars (id) on delete cascade unique,
+    parking_id integer references parking_spaces (id) on delete cascade,
+    car_id     integer references cars (id) on delete cascade,
     is_paid    boolean default false
 );
 
