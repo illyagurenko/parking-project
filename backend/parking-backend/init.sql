@@ -1,0 +1,28 @@
+create table clients
+(
+    id        serial primary key,
+    full_name varchar(255) not null
+);
+
+create table cars
+(
+    id         serial primary key,
+    number_car varchar(9) not null unique,
+    clients_id integer references clients (id)  on delete set null unique
+);
+
+create table parking_spaces
+(
+    id           serial primary key,
+    number_space varchar(15) not null unique check (left (number_space, 2) = 'N_')
+    );
+
+create table reservations
+(
+    id         serial primary key,
+    parking_id integer references parking_spaces (id) on delete cascade unique,
+    car_id     integer references cars (id) on delete cascade unique,
+    is_paid    boolean default false
+);
+
+

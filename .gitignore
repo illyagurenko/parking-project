@@ -1,0 +1,45 @@
+### --- Среды разработки (IDEs) ---
+# IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+
+# Visual Studio Code
+.vs/
+.vscode/
+*.code-workspace
+
+### --- Системные файлы ---
+.DS_Store
+Thumbs.db
+
+### --- Backend (Java / Maven) ---
+# Папки сборки и временные файлы
+**/target/
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# Логи сборки и приложения
+*.log
+logs/
+
+# Запускные скрипты Maven (если не хотите их трекать)
+.mvn/wrapper/maven-wrapper.jar
+
+### --- Конфиденциальные данные ---
+# Локальные переменные окружения
+.env
+.env.local
+.env.*.local
+
+### --- Будущий Frontend (Базовые правила) ---
+# Зависимости и сборка (на будущее)
+**/node_modules/
+**/dist/
+**/build/
+.npm
