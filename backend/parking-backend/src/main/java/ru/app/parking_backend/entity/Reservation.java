@@ -12,7 +12,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Reservations  {
+public class Reservation  {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
