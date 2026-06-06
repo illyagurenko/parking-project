@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
-import ru.app.parking_backend.entity.Car;
 import ru.app.parking_backend.entity.Reservation;
 
 import java.time.LocalDateTime;

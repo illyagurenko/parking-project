@@ -25,7 +25,7 @@ public class ParkingSpaceRepository {
         return jdbcTemplate.query(sql, parkingSpaceRowMapper);
     }
 
-    public List<ParkingSpace> findClientByFullName(String numberSpace){
+    public List<ParkingSpace> findParkingSpaceByNumber(String numberSpace){
         String sql = "select * from parking_spaces where upper(full_name) = ?";
         return jdbcTemplate.query(sql, parkingSpaceRowMapper, numberSpace.toUpperCase());
     }
