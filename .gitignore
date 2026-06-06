@@ -37,8 +37,8 @@ logs/
 .env.local
 .env.*.local
 
-### --- Будущий Frontend (Базовые правила) ---
-# Зависимости и сборка (на будущее)
+### Frontend
+# Зависимости и сборка
 **/node_modules/
 **/dist/
 **/build/
