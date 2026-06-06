@@ -6,14 +6,36 @@ import org.springframework.stereotype.Repository;
 import ru.app.parking_backend.entity.Car;
 import ru.app.parking_backend.entity.Client;
 
+import java.util.List;
+
 @Repository
 @RequiredArgsConstructor
 public class ClientRepository {
 
     private final JdbcTemplate jdbcTemplate;
 
-    private final RowMapper<Client> carRowMapper = (rs, rowNum) -> new Client(
+    private final RowMapper<Client> clientRowMapper = (rs, rowNum) -> new Client(
             rs.getInt("id"),
             rs.getString("full_name")
     );
+
+    public List<Client> findAllClient(){
+        String sql = "select * from clients";
+        return jdbcTemplate.query(sql, clientRowMapper);
+    }
+
+    public List<Client> findClientByFullName(String fullName){
+        String sql = "select * from clients where upper(full_name) = ?";
+        return jdbcTemplate.query(sql, clientRowMapper, fullName.toUpperCase());
+    }
+
+    public void saveClient(Client client){
+        String sql = "insert into clients (full_name) values (?)";
+        jdbcTemplate.update(sql, client.fullName());
+    }
+
+    public void deleteClient(Integer id){
+        String sql = "delete from clients where id = ?";
+        jdbcTemplate.update(sql, id);
+    }
 }

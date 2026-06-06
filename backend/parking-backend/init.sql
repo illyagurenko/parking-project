@@ -26,3 +26,6 @@ create table reservations
 );
 
 
+alter table reservations
+    add column start_time timestamp with time zone not null,
+    add column add_time timestamp with time zone not null;
