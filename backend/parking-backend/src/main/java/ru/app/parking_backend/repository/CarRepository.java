@@ -15,7 +15,7 @@ public class CarRepository {
     private final RowMapper<Car> carRowMapper = (rs, rowNum) -> new Car(
             rs.getInt("id"),
             rs.getString("number_car"),
-            rs.getInt("clientId")
+            rs.getInt("client_id")
     );
 
     public List<Car> findAllCar(){
