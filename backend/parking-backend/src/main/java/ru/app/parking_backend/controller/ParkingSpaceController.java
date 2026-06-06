@@ -1,8 +1,36 @@
 package ru.app.parking_backend.controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.*;
+import ru.app.parking_backend.entity.ParkingSpace;
+import ru.app.parking_backend.repository.ParkingSpaceRepository;
+import ru.app.parking_backend.service.ParkingSpaceService;
+
+import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api")
+@RequiredArgsConstructor
 public class ParkingSpaceController {
+    private final ParkingSpaceService parkingSpaceService;
+
+    @GetMapping
+    public List<ParkingSpace> findAllParkingSpace(){
+        return parkingSpaceService.findAllParkingSpace();
+    }
+
+    @GetMapping("/{number_parking}")
+    public Optional<ParkingSpace> findParkingSpaceByNumber(@PathVariable String number){
+        return parkingSpaceService.findParkingSpaceByNumber(number);
+    }
+
+    @PostMapping
+    public ParkingSpace saveParkingSpace(@RequestBody ParkingSpace space){
+        return parkingSpaceService.saveParkingSpace(space);
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteParkingSpace(Integer id){
+        parkingSpaceService.deleteParkingSpace(id);
+    }
 }
