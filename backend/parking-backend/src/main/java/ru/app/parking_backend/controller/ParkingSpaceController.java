@@ -37,7 +37,7 @@ public class ParkingSpaceController {
     }
 
     @DeleteMapping("/{id}")
-    public void deleteParkingSpace(Integer id){
+    public void deleteParkingSpace(@PathVariable Integer id){
         parkingSpaceService.deleteParkingSpace(id);
     }
 }

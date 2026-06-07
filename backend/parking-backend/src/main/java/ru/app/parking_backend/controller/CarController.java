@@ -41,7 +41,7 @@ public class CarController {
     }
 
     @DeleteMapping("/{id}")
-    public void deleteCar(Integer id){
+    public void deleteCar(@PathVariable Integer id){
         carService.deleteCar(id);
     }
 
@@ -54,5 +54,10 @@ public class CarController {
     @GetMapping("/by-client/{clientId}")
     public List<CarWithClientDTO> findCarsByClient(@PathVariable Integer clientId) {
         return carService.findCarsByClientId(clientId);
+    }
+
+    @GetMapping("/search-by-owner")
+    public List<CarWithClientDTO> findCarsByOwnerName(@RequestParam String name) {
+        return carService.findCarsByClientName(name);
     }
 }

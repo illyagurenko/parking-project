@@ -18,8 +18,11 @@ public class ReservationController {
     public List<Reservation> findAllReservations(){
         return reservationService.findAllReservations();
     }
-    @GetMapping("/{number_car}/{full_name}")
-    public Optional<Reservation> findCarByNumberCarAndFullName(@PathVariable String carNumber,@PathVariable String fullName){
+
+    @GetMapping("/search")
+    public Optional<Reservation> findCarByNumberCarAndFullName(
+            @RequestParam String carNumber,
+            @RequestParam String fullName){
         return reservationService.findCarByNumberCarAndFullName(carNumber, fullName);
     }
 
@@ -27,6 +30,7 @@ public class ReservationController {
     public void saveReservation(@RequestParam Integer carId, @RequestParam Integer parkingId){
         reservationService.saveReservation(carId, parkingId);
     }
+
     @PatchMapping("/{id}/release")
     public void releaseReservation(@PathVariable Integer id){
         reservationService.releaseReservation(id);
@@ -36,5 +40,4 @@ public class ReservationController {
     public void payReservation(@PathVariable Integer id){
         reservationService.payReservation(id);
     }
-
 }

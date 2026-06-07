@@ -29,8 +29,7 @@ public class CarService {
     }
 
     public Car saveCar(Car car){
-        carRepository.saveCar(car);
-        return car;
+        return carRepository.saveCar(car);
     }
 
     public void updateCarNumber(Integer id, UpdateCarRequest request) {
@@ -43,11 +42,15 @@ public class CarService {
 
     @Transactional
     public CarWithClientDTO addCarWithClient(AddCarWithClientRequest request) {
-        // 1. Ищем клиента (регистронезависимо)
-        Client client = clientRepository.findClientByFullName(request.fullName()).getFirst();
+        List<Client> existingClients = clientRepository.findClientByFullName(request.fullName());
+        Client client;
+        if (existingClients.isEmpty()) {
+            client = clientRepository.saveClientAndReturn(new Client(null, request.fullName()));
+        } else {
+            client = existingClients.get(0);
+        }
 
-        // 2. Создаём машину
-        Car car = carRepository.saveCar(carRepository.findCarByNumber(request.numberCar()).getFirst());
+        Car car = carRepository.saveCar(new Car(null, request.numberCar(), client.id()));
 
         return new CarWithClientDTO(
                 car.id(),
@@ -59,5 +62,9 @@ public class CarService {
 
     public List<CarWithClientDTO> findCarsByClientId(Integer clientId) {
         return carRepository.findByClientId(clientId);
+    }
+
+    public List<CarWithClientDTO> findCarsByClientName(String clientName) {
+        return carRepository.findByClientName(clientName);
     }
 }
