@@ -1,11 +1,12 @@
 package ru.app.parking_backend.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import ru.app.parking_backend.dto.ReservationDto;
 import ru.app.parking_backend.entity.Reservation;
 import ru.app.parking_backend.service.ReservationService;
 
 import java.util.List;
-import java.util.Optional;
+
 
 @RestController
 @RequestMapping("/api/reservations")
@@ -15,29 +16,23 @@ public class ReservationController {
     private final ReservationService reservationService;
 
     @GetMapping
-    public List<Reservation> findAllReservations(){
-        return reservationService.findAllReservations();
+    public List<ReservationDto> listActive(@RequestParam(required = false) String reserv) {
+        return reservationService.listActive(reserv);
     }
 
-    @GetMapping("/search")
-    public Optional<Reservation> findCarByNumberCarAndFullName(
-            @RequestParam String carNumber,
-            @RequestParam String fullName){
-        return reservationService.findCarByNumberCarAndFullName(carNumber, fullName);
-    }
-
+    // Принимает сущность Reservation для записи в БД (достаточно прислать parkingId, carId, isPaid)
     @PostMapping
-    public void saveReservation(@RequestParam Integer carId, @RequestParam Integer parkingId){
-        reservationService.saveReservation(carId, parkingId);
+    public void create(@RequestBody Reservation reservation) {
+        reservationService.create(reservation);
     }
 
-    @PatchMapping("/{id}/release")
-    public void releaseReservation(@PathVariable Integer id){
-        reservationService.releaseReservation(id);
+    @PutMapping("/{id}/pay")
+    public void updatePayment(@PathVariable Integer id, @RequestParam boolean isPaid) {
+        reservationService.updatePayment(id, isPaid);
     }
 
-    @PatchMapping("/{id}/payment")
-    public void payReservation(@PathVariable Integer id){
-        reservationService.payReservation(id);
+    @PutMapping("/{id}/release")
+    public void release(@PathVariable Integer id) {
+        reservationService.releaseSpace(id);
     }
 }

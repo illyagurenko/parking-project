@@ -2,54 +2,38 @@ package ru.app.parking_backend.repository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import ru.app.parking_backend.entity.ParkingSpace;
-
-import java.sql.PreparedStatement;
 import java.util.List;
 
 @Repository
 @RequiredArgsConstructor
 public class ParkingSpaceRepository {
+    private final JdbcTemplate jdbc;
 
-    private final JdbcTemplate jdbcTemplate;
-
-    private final RowMapper<ParkingSpace> parkingSpaceRowMapper = (rs, rowNum) -> new ParkingSpace(
+    private final RowMapper<ParkingSpace> rowMapper = (rs, rowNum) -> new ParkingSpace(
             rs.getInt("id"),
             rs.getString("number_space")
     );
 
-    public List<ParkingSpace> findAllParkingSpace(){
-        String sql = "select * from parking_spaces";
-        return jdbcTemplate.query(sql, parkingSpaceRowMapper);
+    public List<ParkingSpace> findAll() {
+        return jdbc.query("SELECT * FROM parking_spaces ORDER BY number_space", rowMapper);
     }
 
-    public List<ParkingSpace> findParkingSpaceByNumber(String numberSpace){
-        String sql = "select * from parking_spaces where upper(number_space) = ?";
-        return jdbcTemplate.query(sql, parkingSpaceRowMapper, numberSpace.toUpperCase());
+    public List<ParkingSpace> findAvailable() {
+        String sql = "SELECT * FROM parking_spaces ps WHERE ps.id NOT IN (SELECT parking_id FROM reservations WHERE end_time IS NULL) ORDER BY ps.number_space";
+        return jdbc.query(sql, rowMapper);
     }
 
-    public ParkingSpace saveParkingSpace(ParkingSpace parkingSpace){
-        String sql = "insert into parking_spaces (number_space) values (?)";
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-        jdbcTemplate.update(connection -> {
-            PreparedStatement ps = connection.prepareStatement(sql, new String[]{"id"});
-            ps.setString(1, parkingSpace.numberSpace());
-            return ps;
-        }, keyHolder);
-        Integer generatedId = keyHolder.getKey().intValue();
-        return new ParkingSpace(generatedId, parkingSpace.numberSpace());
+    public void save(ParkingSpace space) {
+        jdbc.update("INSERT INTO parking_spaces (number_space) VALUES (?)", space.numberSpace());
     }
 
-    public void updateParkingSpaceNumber(Integer id, String newParkingSpaceNumber) {
-        String sql = "update parking_spaces set number_space = ? where id = ?";
-        jdbcTemplate.update(sql, newParkingSpaceNumber, id);
+    public void update(ParkingSpace space) {
+        jdbc.update("UPDATE parking_spaces SET number_space = ? WHERE id = ?", space.numberSpace(), space.id());
     }
 
-    public void deleteParkingSpace(Integer id){
-        String sql = "delete from parking_spaces where id = ?";
-        jdbcTemplate.update(sql, id);
+    public void delete(Integer id) {
+        jdbc.update("DELETE FROM parking_spaces WHERE id = ?", id);
     }
 }

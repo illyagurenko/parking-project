@@ -1,13 +1,11 @@
 package ru.app.parking_backend.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import ru.app.parking_backend.dto.UpdateClientRequest;
-import ru.app.parking_backend.entity.Car;
 import ru.app.parking_backend.entity.Client;
 import ru.app.parking_backend.service.ClientService;
 
 import java.util.List;
-import java.util.Optional;
+
 
 @RestController
 @RequestMapping("/api/clients")
@@ -17,27 +15,22 @@ public class ClientController {
     private final ClientService clientService;
 
     @GetMapping
-    public List<Client> findAllClient(){
-        return clientService.findAllClient();
-    }
-
-    @GetMapping("/{name}")
-    public Optional<Client> findClientByFullName(@PathVariable("name") String fullName){
-        return clientService.findClientByFullName(fullName);
+    public List<Client> list(@RequestParam(required = false) String name) {
+        return clientService.findAll(name);
     }
 
     @PostMapping
-    public Client saveClient(@RequestBody Client client){
-        return clientService.saveClient(client);
+    public void create(@RequestBody Client client) {
+        clientService.create(client);
     }
 
     @PutMapping("/{id}")
-    public void updateClientName(@PathVariable Integer id, @RequestBody UpdateClientRequest request){
-        clientService.updateClientName(id, request);
+    public void update(@PathVariable Integer id, @RequestBody Client client) {
+        clientService.update(id, client);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteClient(@PathVariable Integer id){
-        clientService.deleteClient(id);
+    public void delete(@PathVariable Integer id) {
+        clientService.delete(id);
     }
 }

@@ -1,17 +1,14 @@
 package ru.app.parking_backend.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.app.parking_backend.dto.AddCarWithClientRequest;
-import ru.app.parking_backend.dto.CarWithClientDTO;
-import ru.app.parking_backend.dto.UpdateCarRequest;
+import ru.app.parking_backend.dto.CarDto;
 import ru.app.parking_backend.entity.Car;
 import ru.app.parking_backend.service.CarService;
 
+
 import java.util.List;
-import java.util.Optional;
+
 
 @RestController
 @RequestMapping("/api/cars")
@@ -21,43 +18,22 @@ public class CarController {
     private final CarService carService;
 
     @GetMapping
-    public List<CarWithClientDTO> findAllCar(){
-        return carService.findAllCar();
-    }
-
-    @GetMapping("/{number}")
-    public Optional<CarWithClientDTO> findCarByNumber(@PathVariable("number") String numberCar){
-        return carService.findCarByNumber(numberCar);
+    public List<CarDto> list(@RequestParam(required = false) String number) {
+        return carService.findAllCarWithClient(number);
     }
 
     @PostMapping
-    public Car saveCar(@RequestBody Car car){
-        return carService.saveCar(car);
+    public void create(@RequestBody Car car) {
+        carService.create(car);
     }
 
     @PutMapping("/{id}")
-    public void updateCarNumber(@PathVariable Integer id, @RequestBody UpdateCarRequest request){
-        carService.updateCarNumber(id, request);
+    public void update(@PathVariable Integer id, @RequestBody Car car) {
+        carService.update(id, car);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteCar(@PathVariable Integer id){
-        carService.deleteCar(id);
-    }
-
-    @PostMapping("/with-client")
-    public ResponseEntity<CarWithClientDTO> addCarWithClient(@RequestBody AddCarWithClientRequest request) {
-        CarWithClientDTO result = carService.addCarWithClient(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(result);
-    }
-
-    @GetMapping("/by-client/{clientId}")
-    public List<CarWithClientDTO> findCarsByClient(@PathVariable Integer clientId) {
-        return carService.findCarsByClientId(clientId);
-    }
-
-    @GetMapping("/search-by-owner")
-    public List<CarWithClientDTO> findCarsByOwnerName(@RequestParam String name) {
-        return carService.findCarsByClientName(name);
+    public void delete(@PathVariable Integer id) {
+        carService.delete(id);
     }
 }

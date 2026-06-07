@@ -1,7 +1,7 @@
 package ru.app.parking_backend.service;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.app.parking_backend.dto.UpdateClientRequest;
 import ru.app.parking_backend.entity.Client;
 import ru.app.parking_backend.repository.ClientRepository;
 
@@ -14,24 +14,23 @@ public class ClientService {
 
     private final ClientRepository clientRepository;
 
-    public List<Client> findAllClient(){
-        return clientRepository.findAllClient();
+    public List<Client> findAll(String name) {
+        if (name != null && !name.trim().isEmpty()) {
+            return clientRepository.searchByName(name);
+        }
+        return clientRepository.findAll();
     }
 
-    public Optional<Client> findClientByFullName(String fullName){
-        return clientRepository.findClientByFullName(fullName).stream()
-                .findFirst();
+    public void create(Client client) {
+        clientRepository.save(client);
     }
 
-    public Client saveClient(Client client){
-        return clientRepository.saveClientAndReturn(client);
+    public void update(Integer id, Client client) {
+        Client upClient = new Client(id, client.fullName());
+        clientRepository.update(upClient);
     }
 
-    public void updateClientName(Integer id, UpdateClientRequest request) {
-        clientRepository.updateClientName(id, request.fullName());
-    }
-
-    public void deleteClient(Integer id){
-        clientRepository.deleteClient(id);
+    public void delete(Integer id) {
+        clientRepository.delete(id);
     }
 }

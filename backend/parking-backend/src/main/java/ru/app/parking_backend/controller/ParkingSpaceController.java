@@ -1,13 +1,10 @@
 package ru.app.parking_backend.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import ru.app.parking_backend.dto.UpdateSpaceRequest;
 import ru.app.parking_backend.entity.ParkingSpace;
-import ru.app.parking_backend.repository.ParkingSpaceRepository;
 import ru.app.parking_backend.service.ParkingSpaceService;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/parking")
@@ -17,27 +14,27 @@ public class ParkingSpaceController {
     private final ParkingSpaceService parkingSpaceService;
 
     @GetMapping
-    public List<ParkingSpace> findAllParkingSpace(){
-        return parkingSpaceService.findAllParkingSpace();
+    public List<ParkingSpace> list() {
+        return parkingSpaceService.findAll();
     }
 
-    @GetMapping("/{number}")
-    public Optional<ParkingSpace> findParkingSpaceByNumber(@PathVariable("number") String number){
-        return parkingSpaceService.findParkingSpaceByNumber(number);
+    @GetMapping("/available")
+    public List<ParkingSpace> listAvailable() {
+        return parkingSpaceService.listAvailable();
     }
 
     @PostMapping
-    public ParkingSpace saveParkingSpace(@RequestBody ParkingSpace space){
-        return parkingSpaceService.saveParkingSpace(space);
+    public void create(@RequestBody ParkingSpace space) {
+        parkingSpaceService.create(space);
     }
 
     @PutMapping("/{id}")
-    public void updateParkingSpaceNumber(@PathVariable Integer id, @RequestBody UpdateSpaceRequest request){
-        parkingSpaceService.updateParkingSpaceNumber(id, request);
+    public void update(@PathVariable Integer id, @RequestBody ParkingSpace space) {
+        parkingSpaceService.update(id, space);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteParkingSpace(@PathVariable Integer id){
-        parkingSpaceService.deleteParkingSpace(id);
+    public void delete(@PathVariable Integer id) {
+        parkingSpaceService.delete(id);
     }
 }

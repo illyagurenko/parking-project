@@ -4,66 +4,67 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
+import ru.app.parking_backend.dto.ReservationDto;
 import ru.app.parking_backend.entity.Reservation;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @Repository
 @RequiredArgsConstructor
 public class ReservationRepository {
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplate jdbc;
 
-    private LocalDateTime toLocalDateTime(Timestamp ts) {
-        return ts != null ? ts.toLocalDateTime() : null;
+
+    private final RowMapper<ReservationDto> dtoMapper = (rs, rowNum) -> new ReservationDto(
+        rs.getInt("id"),
+        rs.getInt("parking_id"),
+        rs.getString("number_space"),
+        rs.getInt("car_id"),
+        rs.getString("number_car"),
+        rs.getString("full_name"),
+        rs.getBoolean("is_paid"),
+        rs.getObject("start_time", OffsetDateTime.class),
+        rs.getObject("end_time", OffsetDateTime.class)
+);
+
+    // Чтение: Получение активных броней в виде DTO
+    public List<ReservationDto> findAllActive() {
+        String sql = "SELECT r.*, ps.number_space, c.number_car, cl.full_name " +
+                "FROM reservations r " +
+                "JOIN parking_spaces ps ON r.parking_id = ps.id " +
+                "JOIN cars c ON r.car_id = c.id " +
+                "LEFT JOIN clients cl ON c.client_id = cl.id " +
+                "WHERE r.end_time IS NULL ORDER BY r.start_time DESC";
+        return jdbc.query(sql, dtoMapper);
     }
 
-    private final RowMapper<Reservation> reservationRowMapper = (rs, rowNum) -> new Reservation(
-            rs.getInt("id"),
-            rs.getObject("parking_id", Integer.class),
-            rs.getObject("car_id", Integer.class),
-            rs.getBoolean("is_paid"),
-            toLocalDateTime(rs.getTimestamp("start_time")),
-            toLocalDateTime(rs.getTimestamp("end_time"))
-    );
-
-    public List<Reservation> findAllReservations() {
-        String sql = "select * from reservations";
-        return jdbcTemplate.query(sql, reservationRowMapper);
+    // Чтение (Поиск): Получение отфильтрованных броней в виде DTO
+    public List<ReservationDto> searchActive(String query) {
+        String sql = "SELECT r.*, ps.number_space, c.number_car, cl.full_name " +
+                "FROM reservations r " +
+                "JOIN parking_spaces ps ON r.parking_id = ps.id " +
+                "JOIN cars c ON r.car_id = c.id " +
+                "LEFT JOIN clients cl ON c.client_id = cl.id " +
+                "WHERE r.end_time IS NULL AND (c.number_car ILIKE ? OR cl.full_name ILIKE ?) " +
+                "ORDER BY r.start_time DESC";
+        String searchParam = "%" + query + "%";
+        return jdbc.query(sql, dtoMapper, searchParam, searchParam);
     }
 
-    public List<Reservation> findCarByNumberCarAndFullName(String carNumber, String fullName) {
-        String sql = """
-                        select
-                        r.id,
-                        r.parking_id,
-                        r.car_id,
-                        r.is_paid,
-                        r.start_time,
-                        r.end_time
-                        from reservations r
-                        join cars c on r.car_id = c.id
-                        join clients cl on c.client_id = cl.id
-                        join parking_spaces p on r.parking_id = p.id
-                        where upper(c.number_car) = ? and upper(cl.full_name) = ?
-                """;
-        return jdbcTemplate.query(sql, reservationRowMapper, carNumber.toUpperCase(), fullName.toUpperCase());
+    // Запись: Принимает чистую сущность Reservation
+    public void create(Reservation res) {
+        jdbc.update("INSERT INTO reservations (parking_id, car_id, is_paid, start_time) VALUES (?, ?, ?, ?)",
+                res.parkingId(), res.carId(), res.isPaid(), OffsetDateTime.now());
     }
 
-    public void saveReservation(Integer carId, Integer parkingSpaceId) {
-        LocalDateTime now = LocalDateTime.now();
-        String sql = "insert into reservations (car_id, parking_id, start_time, add_time) values (?, ?, ?, ?)";
-        jdbcTemplate.update(sql, carId, parkingSpaceId, now, now);
+    public void updatePayment(Integer id, boolean isPaid) {
+        jdbc.update("UPDATE reservations SET is_paid = ? WHERE id = ?", isPaid, id);
     }
 
-    public void releaseReservation(Integer id) {
-        String sql = "update reservations set end_time = current_timestamp where id = ?";
-        jdbcTemplate.update(sql, id);
-    }
-
-    public void payReservation(Integer id) {
-        String sql = "update reservations set is_paid = true where id = ?";
-        jdbcTemplate.update(sql, id);
+    public void releaseSpace(Integer id) {
+        jdbc.update("UPDATE reservations SET end_time = ? WHERE id = ?", OffsetDateTime.now(), id);
     }
 }
