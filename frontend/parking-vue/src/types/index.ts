@@ -3,3 +3,8 @@ export interface Car{
     numberCar: string,
     clientId: number
 }
+
+export interface Client{
+    id: number,
+    fullName: string,
+}

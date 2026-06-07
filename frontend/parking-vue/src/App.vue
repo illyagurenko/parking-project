@@ -1,37 +1,67 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { useCarStore } from './stores/carStore' // Укажите правильный путь к вашему файлу стора
+import { ref, onMounted, computed } from 'vue'
+import { useCarStore } from './stores/carStore' 
+import { useClientStore } from './stores/clientStore'
 
-// Импортируем компоненты PrimeVue
+// Компоненты PrimeVue
 import Card from 'primevue/card'
 import InputText from 'primevue/inputtext'
-import InputNumber from 'primevue/inputnumber'
 import Button from 'primevue/button'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 
-// Подключаем наш стор
 const carStore = useCarStore()
+const clientStore = useClientStore()
 
 // Локальные переменные для формы добавления
 const carNumber = ref<string>('')
-const clientId = ref<number | null>(null)
+const fullName = ref<string>('')
 
-// При монтировании страницы запрашиваем список машин с сервера
+// Загрузка данных при монтировании
 onMounted(() => {
   carStore.fetchCars()
+  clientStore.fetchClients()
+})
+
+// Вычисляемое свойство для объединения данных машин и клиентов
+const combinedCarsData = computed(() => {
+  return carStore.cars.map(car => {
+    // Ищем клиента, у которого id совпадает с clientId из машины
+    const client = clientStore.clients.find(c => c.id === car.clientId)
+    return {
+      ...car,
+      // Если клиент найден, берем его ФИО, иначе выводим заглушку
+      clientFullName: client ? client.fullName : 'Неизвестный клиент'
+    }
+  })
 })
 
 // Обработчик отправки формы
-const onAddCar = async () => {
-  // Проверяем, что поля заполнены
-  if (carNumber.value.trim() && clientId.value !== null) {
-    // Передаем в метод стора номер машины и ID клиента
-    await carStore.addCars(carNumber.value, clientId.value)
-    
-    // Очищаем поля формы после добавления
-    carNumber.value = ''
-    clientId.value = null
+const onAddClientAndCar = async () => {
+  // Проверяем, что оба поля заполнены
+  if (!fullName.value.trim() || !carNumber.value.trim()) return
+
+  try {
+    // 1. Создаем клиента (метод сам вызовет fetchClients внутри себя)
+    await clientStore.addClients(fullName.value.trim())
+
+    // 2. Ищем только что созданного клиента в обновленном массиве стора
+    const createdClient = clientStore.clients.find(
+      c => c.fullName.toLowerCase() === fullName.value.trim().toLowerCase()
+    )
+
+    if (createdClient && createdClient.id) {
+      // 3. Создаем машину, привязывая её к ID найденного клиента
+      await carStore.addCars(carNumber.value.trim(), createdClient.id)
+      
+      // Очищаем поля формы после успешного добавления всего процесса
+      carNumber.value = ''
+      fullName.value = ''
+    } else {
+      console.error('Не удалось найти созданного клиента для привязки автомобиля')
+    }
+  } catch (error) {
+    console.error('Ошибка при добавлении данных:', error)
   }
 }
 </script>
@@ -44,8 +74,17 @@ const onAddCar = async () => {
       </template>
       
       <template #content>
-        <!-- Форма для добавления автомобиля -->
+        <!-- Форма для добавления автомобиля и клиента -->
         <div class="car-form">
+          <div class="input-group">
+            <label for="full-name">ФИО владельца</label>
+            <InputText
+              id="full-name" 
+              v-model="fullName" 
+              placeholder="Введите ФИО" 
+            />
+          </div>
+
           <div class="input-group">
             <label for="car-number">Номер машины</label>
             <InputText 
@@ -55,29 +94,19 @@ const onAddCar = async () => {
             />
           </div>
 
-          <div class="input-group">
-            <label for="client-id">ID Клиента</label>
-            <InputNumber 
-              id="client-id" 
-              v-model="clientId" 
-              placeholder="Введите ID" 
-              :useGrouping="false"
-            />
-          </div>
-
           <Button 
             label="Добавить" 
             icon="pi pi-plus" 
-            @click="onAddCar" 
-            :disabled="!carNumber.trim() || clientId === null"
+            @click="onAddClientAndCar" 
+            :disabled="!carNumber.trim() || !fullName.trim()"
           />
         </div>
 
-        <!-- Таблица для вывода списка машин -->
-        <DataTable :value="carStore.cars" class="p-datatable-sm" stripedRows>
+        <!-- Таблица для вывода объединенного списка -->
+        <DataTable :value="combinedCarsData" class="p-datatable-sm" stripedRows>
           <Column field="id" header="ID автомобиля" />
           <Column field="numberCar" header="Гос. номер" />
-          <Column field="clientId" header="ID Владельца (Клиента)" />
+          <Column field="clientFullName" header="ФИО Владельца" />
           <Column header="Действие">
             <template #body="{ data }">
               <Button 
