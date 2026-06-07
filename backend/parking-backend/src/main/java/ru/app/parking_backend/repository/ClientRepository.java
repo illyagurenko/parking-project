@@ -3,7 +3,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
-import ru.app.parking_backend.entity.Car;
 import ru.app.parking_backend.entity.Client;
 
 import java.util.List;
@@ -35,11 +34,13 @@ public class ClientRepository {
     }
 
     public void updateClientName(Integer id, String newFullName) {
-        String sql = "update cars set number_car = ? where id = ?";
+        String sql = "update clients set full_name = ? where id = ?";
         jdbcTemplate.update(sql, newFullName, id);
     }
 
     public void deleteClient(Integer id){
+        String deleteCarsSql = "delete from cars where client_id = ?";
+        jdbcTemplate.update(deleteCarsSql, id);
         String sql = "delete from clients where id = ?";
         jdbcTemplate.update(sql, id);
     }

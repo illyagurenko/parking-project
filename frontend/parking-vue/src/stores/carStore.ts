@@ -42,10 +42,14 @@ export const useCarStore = defineStore('car', () => {
         await fetchCars();
     }
 
-        async function deleteCar(id: number) {
-        await axios.delete(`${API_URL}/${id}`)
-        cars.value = cars.value.filter(t => t.id !== id)
-        
+    async function updateCar(id: number, numberCar: string) {
+        await axios.put(`${API_URL}/${id}`, { numberCar })
+        await fetchCars() // Обновляем список локально
     }
-    return { cars, fetchCars, fetchCarsByNumber, addCars, deleteCar };
+
+    async function deleteCar(id: number) {
+        await axios.delete(`${API_URL}/${id}`)
+        cars.value = cars.value.filter(t => t.id !== id) 
+    }
+    return { cars, fetchCars, fetchCarsByNumber, addCars, updateCar, deleteCar };
 })

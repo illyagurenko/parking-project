@@ -36,7 +36,7 @@ public class ParkingSpaceRepository {
     }
 
     public void updateParkingSpaceNumber(Integer id, String newParkingSpaceNumber) {
-        String sql = "update cars set number_car = ? where id = ?";
+        String sql = "update parking_spaces set number_space = ? where id = ?";
         jdbcTemplate.update(sql, newParkingSpaceNumber, id);
     }
 

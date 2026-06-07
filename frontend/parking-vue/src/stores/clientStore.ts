@@ -39,10 +39,15 @@ export const useClientStore = defineStore('client', () => {
         await fetchClients();
     }
 
+    async function updateClient(id: number, fullName: string) {
+    await axios.put(`${API_URL}/${id}`, { fullName })
+    await fetchClients() 
+}
+
     async function deleteClient(id: number) {
         await axios.delete(`${API_URL}/${id}`)
         clients.value = clients.value.filter(t => t.id !== id)
         
     }
-    return { clients, fetchClients, fetchClientByFullName, addClients, deleteClient };
+    return { clients, fetchClients, fetchClientByFullName, addClients, updateClient, deleteClient };
 })

@@ -8,6 +8,7 @@ import InputText from 'primevue/inputtext'
 import Button from 'primevue/button'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
+import Dialog from 'primevue/dialog'
 
 const carStore = useCarStore()
 const clientStore = useClientStore()
@@ -16,6 +17,14 @@ const carNumber = ref<string>('')
 const fullName = ref<string>('')
 const searchCarNumber = ref<string>('')
 const searchFullName = ref<string>('')
+
+  // Состояния для модального окна редактирования
+
+const isEditDialogVisible = ref<boolean>(false)
+const editingCarId = ref<number | null>(null)
+const editCarOwnerName = ref<string>('')
+const editCarNumber = ref<string>('')
+
 
 const loadAllData = () => {
   carStore.fetchCars()
@@ -33,6 +42,29 @@ const combinedCarsData = computed(() => {
     }
   })
 })
+
+const onEditCarClick = (car: any) => {
+  editingCarId.value = car.id
+  editCarNumber.value = car.numberCar
+  editCarOwnerName.value = car.clientFullName // Записываем ФИО владельца для справки
+  isEditDialogVisible.value = true
+}
+
+// Сохранение изменений
+const onSaveCarEdit = async () => {
+  if (!editCarNumber.value.trim() || !editingCarId.value) return
+
+  try {
+    // Вызываем метод стора, передавая только ID машины и её новый номер
+    await carStore.updateCar(editingCarId.value, editCarNumber.value.trim())
+    
+    // Закрываем окно и сбрасываем ID
+    isEditDialogVisible.value = false
+    editingCarId.value = null
+  } catch (error) {
+    console.error('Ошибка при сохранении номера машины:', error)
+  }
+}
 
 // Добавление автомобиля и клиента с проверкой на дубликаты ФИО
 const onAddClientAndCar = async () => {
@@ -175,16 +207,46 @@ const onSearchClient = async () => {
       </div>
 
       <!-- Таблица автомобилей -->
-      <DataTable :value="combinedCarsData" class="p-datatable-sm" stripedRows>
+<DataTable :value="combinedCarsData" class="p-datatable-sm" stripedRows>
         <Column field="id" header="ID автомобиля" />
         <Column field="numberCar" header="Гос. номер" />
         <Column field="clientFullName" header="ФИО Владельца" />
-        <Column header="Действие">
+        <Column header="Действия">
           <template #body="{ data }">
-            <Button icon="pi pi-trash" severity="danger" text rounded @click="carStore.deleteCar(data.id)" />
+            <div class="actions-cell">
+              <!-- Кнопка редактирования -->
+              <Button icon="pi pi-pencil" severity="warn" text rounded @click="onEditCarClick(data)" />
+              <!-- Кнопка удаления -->
+              <Button icon="pi pi-trash" severity="danger" text rounded @click="carStore.deleteCar(data.id)" />
+            </div>
           </template>
         </Column>
       </DataTable>
+
+      <!-- МОДАЛЬНОЕ ОКНО РЕДАКТИРОВАНИЯ -->
+      <Dialog 
+        v-model:visible="isEditDialogVisible" 
+        modal 
+        header="Редактирование данных" 
+        :style="{ width: '25rem' }"
+      >
+  <div class="edit-dialog-form">
+    <!-- Поле ФИО заблокировано для ввода (disabled) -->
+    <div class="input-group">
+      <label for="edit-full-name">Владелец автомобиля (нельзя изменить)</label>
+      <InputText id="edit-full-name" v-model="editCarOwnerName" disabled class="full-width" />
+    </div>
+          <div class="input-group">
+            <label for="edit-car-number">Номер машины</label>
+            <InputText id="edit-car-number" v-model="editCarNumber" class="full-width" />
+          </div>
+          
+          <div class="dialog-actions">
+            <Button label="Отмена" severity="secondary" text @click="isEditDialogVisible = false" />
+            <Button label="Сохранить" severity="success" @click="onSaveCarEdit" :disabled="!editCarNumber.trim()" />
+          </div>
+        </div>
+      </Dialog>
     </template>
   </Card>
 </template>
@@ -242,5 +304,28 @@ const onSearchClient = async () => {
 .reset-btn {
   align-self: flex-start;
   margin-top: 0.5rem;
+}
+
+.actions-cell {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.edit-dialog-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  padding-top: 0.5rem;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 1rem;
 }
 </style>

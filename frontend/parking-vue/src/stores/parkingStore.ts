@@ -22,10 +22,15 @@ export const useParkingStore = defineStore('parkingStore', () => {
     await fetchSpaces()
   }
 
+  async function updateSpace(id: number, numberSpace: string) {
+    await axios.put(`${API_URL}/${id}`, { numberSpace })
+    await fetchSpaces() // Обновляем список локально
+}
+
   async function deleteSpace(id: number) {
     await axios.delete(`${API_URL}/${id}`)
     await fetchSpaces()
   }
 
-  return { spaces, fetchSpaces, addSpace, deleteSpace }
+  return { spaces, fetchSpaces, addSpace, updateSpace, deleteSpace }
 })
