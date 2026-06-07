@@ -20,8 +20,8 @@ public class ClientController {
         return clientService.findAllClient();
     }
 
-    @GetMapping("/{full_name}")
-    public Optional<Client> findClientByFullName(@PathVariable String fullName){
+    @GetMapping("/{name}")
+    public Optional<Client> findClientByFullName(@PathVariable("name") String fullName){
         return clientService.findClientByFullName(fullName);
     }
 

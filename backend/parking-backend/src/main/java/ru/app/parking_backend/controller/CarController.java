@@ -20,8 +20,8 @@ public class CarController {
         return carService.findAllCar();
     }
 
-    @GetMapping("/{number_car}")
-    public Optional<Car> findCarByNumber(@PathVariable String numberCar){
+    @GetMapping("/{number}")
+    public Optional<Car> findCarByNumber(@PathVariable("number") String numberCar){
         return carService.findCarByNumber(numberCar);
     }
 

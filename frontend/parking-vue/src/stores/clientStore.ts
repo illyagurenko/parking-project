@@ -15,8 +15,19 @@ export const useClientStore = defineStore('client', () => {
     }
 
     async function fetchClientByFullName(fullName: string) {
-        const response = await axios.get(`${API_URL}/${fullName}`)
-        clients.value = response.data
+        try{
+            const response = await axios.get(`${API_URL}/${fullName}`)
+            if (response.data) {
+                // Оборачиваем один объект в квадратные скобки [ ... ], чтобы сделать массивом
+                clients.value = [response.data] 
+            } else {
+                // Если сервер вернул пустоту (null)
+                clients.value = [] 
+            }
+        } catch (error) {
+            console.error("Ошибка поиска:", error)
+            clients.value = [] // В случае ошибки тоже отдаем пустой массив
+        }
     }
 
     async function addClients(fullName: string) {

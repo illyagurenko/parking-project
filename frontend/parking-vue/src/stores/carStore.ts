@@ -17,8 +17,19 @@ export const useCarStore = defineStore('car', () => {
     }
 
     async function fetchCarsByNumber(numberCar: string) {
-        const response = await axios.get(`${API_URL}/${numberCar}`)
-        cars.value = response.data
+        try{
+            const response = await axios.get(`${API_URL}/${numberCar}`)
+            if (response.data) {
+                // Оборачиваем один объект в квадратные скобки [ ... ], чтобы сделать массивом
+                cars.value = [response.data] 
+            } else {
+                // Если сервер вернул пустоту (null)
+                cars.value = [] 
+            }
+        } catch (error) {
+            console.error("Ошибка поиска:", error)
+            cars.value = [] // В случае ошибки тоже отдаем пустой массив
+        }
     }
 
     async function addCars(numberCar: string, clientId: number) {

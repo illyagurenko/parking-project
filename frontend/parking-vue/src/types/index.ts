@@ -8,3 +8,8 @@ export interface Client{
     id: number,
     fullName: string,
 }
+
+export interface ParkingSpace{
+    id: number,
+    numberSpace: string,
+}

@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/parking")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "http://localhost:5173")
 public class ParkingSpaceController {
