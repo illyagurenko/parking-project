@@ -1,6 +1,7 @@
 package ru.app.parking_backend.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.app.parking_backend.dto.UpdateSpaceRequest;
 import ru.app.parking_backend.entity.Car;
 import ru.app.parking_backend.entity.ParkingSpace;
 import ru.app.parking_backend.repository.ParkingSpaceRepository;
@@ -28,8 +29,8 @@ public class ParkingSpaceService {
         return space;
     }
 
-    public void updateParkingSpaceNumber(Integer id, String newParkingSpaceNumber) {
-        parkingSpaceRepository.updateParkingSpaceNumber(id, newParkingSpaceNumber);
+    public void updateParkingSpaceNumber(Integer id, UpdateSpaceRequest request) {
+        parkingSpaceRepository.updateParkingSpaceNumber(id, request.numberSpace());
     }
 
     public void deleteParkingSpace(Integer id){

@@ -1,6 +1,7 @@
 package ru.app.parking_backend.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.app.parking_backend.dto.UpdateClientRequest;
 import ru.app.parking_backend.entity.Car;
 import ru.app.parking_backend.entity.Client;
 import ru.app.parking_backend.repository.ClientRepository;
@@ -27,8 +28,8 @@ public class ClientService {
         clientRepository.saveClient(client);
         return client;
     }
-    public void updateClientName(Integer id, String newFullName) {
-        clientRepository.updateClientName(id, newFullName);
+    public void updateClientName(Integer id, UpdateClientRequest request) {
+        clientRepository.updateClientName(id, request.fullName());
     }
 
 

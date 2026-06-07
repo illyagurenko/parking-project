@@ -1,6 +1,7 @@
 package ru.app.parking_backend.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.app.parking_backend.dto.UpdateCarRequest;
 import ru.app.parking_backend.entity.Car;
 import ru.app.parking_backend.repository.CarRepository;
 
@@ -26,8 +27,8 @@ public class CarService {
         return car;
     }
 
-    public void updateCarNumber(Integer id, String newCarNumber) {
-        carRepository.updateCarNumber(id, newCarNumber);
+    public void updateCarNumber(Integer id, UpdateCarRequest request) {
+        carRepository.updateCarNumber(id, request.numberCar());
     }
 
     public void deleteCar(Integer id){

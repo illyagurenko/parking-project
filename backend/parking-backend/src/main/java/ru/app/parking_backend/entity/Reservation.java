@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 
 public record Reservation (
         Integer id,
-        Integer parkingSpaceId,
+        Integer parkingId,
         Integer carId,
         boolean isPaid,
         LocalDateTime startTime,

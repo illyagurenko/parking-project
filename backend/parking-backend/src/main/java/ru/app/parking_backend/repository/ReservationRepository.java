@@ -16,41 +16,48 @@ public class ReservationRepository {
 
     private final RowMapper<Reservation> reservationRowMapper = (rs, rowNum) -> new Reservation(
             rs.getInt("id"),
-            rs.getInt("parking_space_id"),
-            rs.getInt("car_id"),
+            rs.getObject("parking_space_id", Integer.class),
+            rs.getObject("car_id", Integer.class),
             rs.getBoolean("is_paid"),
             rs.getObject("start_time", LocalDateTime.class),
             rs.getObject("end_time", LocalDateTime.class)
-            );
+    );
 
-    public List<Reservation> findAllReservations(){
+    public List<Reservation> findAllReservations() {
         String sql = "select * from reservations";
         return jdbcTemplate.query(sql, reservationRowMapper);
     }
 
-    public List<Reservation> findCarByNumberCarAndFullName(String carNumber, String fullName){
+    public List<Reservation> findCarByNumberCarAndFullName(String carNumber, String fullName) {
         String sql = """
-                        select * from reservations r 
+                        select 
+                        r.id,
+                        r.parking_id,
+                        r.car_id,
+                        r.is_paid,
+                        r.start_time,
+                        r.end_time  
+                        from reservations r 
                         join cars c on r.car_id = c.id
-                        join clients cl on c.client.id = cl.id
-                        join parkins_spaces p on r.parking_space_id = p.id
+                        join clients cl on c.client_id = cl.id
+                        join parking_spaces p on r.parking_id = p.id
                         where upper(c.number_car) = ? and upper(cl.full_name) = ?
                 """;
         return jdbcTemplate.query(sql, reservationRowMapper, carNumber.toUpperCase(), fullName.toUpperCase());
     }
 
-    public void saveReservation(Integer carId, Integer parkingSpaceId){
+    public void saveReservation(Integer carId, Integer parkingSpaceId) {
         LocalDateTime startTime = LocalDateTime.now();
-        String sql = "insert into reservations (car_id, parking_space_id, start_time) values (?, ?, ?)";
+        String sql = "insert into reservations (car_id, parking_id, start_time) values (?, ?, ?)";
         jdbcTemplate.update(sql, carId, parkingSpaceId, startTime);
     }
 
-    public void releaseReservation(Integer id){
+    public void releaseReservation(Integer id) {
         String sql = "update reservations set end_time = current_timestamp where id = ?";
         jdbcTemplate.update(sql, id);
     }
 
-    public void payReservation(Integer id){
+    public void payReservation(Integer id) {
         String sql = "update reservations set is_paid = true where id = ?";
         jdbcTemplate.update(sql, id);
     }

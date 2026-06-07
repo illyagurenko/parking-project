@@ -24,8 +24,8 @@ public class ReservationService {
                 .findFirst();
     }
 
-    public void saveReservation(Integer carId, Integer parkingSpaceId){
-        reservationRepository.saveReservation(carId, parkingSpaceId);
+    public void saveReservation(Integer carId, Integer parkingId){
+        reservationRepository.saveReservation(carId, parkingId);
     }
 
     public void releaseReservation(Integer id){

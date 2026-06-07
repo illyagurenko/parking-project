@@ -39,8 +39,6 @@ public class ClientRepository {
     }
 
     public void deleteClient(Integer id){
-        String deleteCarsSql = "delete from cars where client_id = ?";
-        jdbcTemplate.update(deleteCarsSql, id);
         String sql = "delete from clients where id = ?";
         jdbcTemplate.update(sql, id);
     }

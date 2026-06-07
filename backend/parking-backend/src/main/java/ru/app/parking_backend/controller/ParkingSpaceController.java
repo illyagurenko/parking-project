@@ -1,6 +1,7 @@
 package ru.app.parking_backend.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import ru.app.parking_backend.dto.UpdateSpaceRequest;
 import ru.app.parking_backend.entity.ParkingSpace;
 import ru.app.parking_backend.repository.ParkingSpaceRepository;
 import ru.app.parking_backend.service.ParkingSpaceService;
@@ -20,8 +21,8 @@ public class ParkingSpaceController {
         return parkingSpaceService.findAllParkingSpace();
     }
 
-    @GetMapping("/{number_parking}")
-    public Optional<ParkingSpace> findParkingSpaceByNumber(@PathVariable String number){
+    @GetMapping("/{number}")
+    public Optional<ParkingSpace> findParkingSpaceByNumber(@PathVariable("number") String number){
         return parkingSpaceService.findParkingSpaceByNumber(number);
     }
 
@@ -31,8 +32,8 @@ public class ParkingSpaceController {
     }
 
     @PutMapping("/{id}")
-    public void updateParkingSpaceNumber(@PathVariable Integer id, @RequestBody String newParkingSpaceNumber){
-        parkingSpaceService.updateParkingSpaceNumber(id, newParkingSpaceNumber);
+    public void updateParkingSpaceNumber(@PathVariable Integer id, @RequestBody UpdateSpaceRequest request){
+        parkingSpaceService.updateParkingSpaceNumber(id, request);
     }
 
     @DeleteMapping("/{id}")

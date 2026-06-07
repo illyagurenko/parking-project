@@ -1,6 +1,7 @@
 package ru.app.parking_backend.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import ru.app.parking_backend.dto.UpdateClientRequest;
 import ru.app.parking_backend.entity.Car;
 import ru.app.parking_backend.entity.Client;
 import ru.app.parking_backend.service.ClientService;
@@ -31,8 +32,8 @@ public class ClientController {
     }
 
     @PutMapping("/{id}")
-    public void updateClientName(@PathVariable Integer id, @RequestBody String newFullName){
-        clientService.updateClientName(id, newFullName);
+    public void updateClientName(@PathVariable Integer id, @RequestBody UpdateClientRequest request){
+        clientService.updateClientName(id, request);
     }
 
     @DeleteMapping("/{id}")

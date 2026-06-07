@@ -31,3 +31,6 @@ alter table reservations
     add column add_time timestamp with time zone not null;
 
 alter table cars rename column clients_id to client_id;
+
+alter table reservations
+    alter column end_time drop not null;

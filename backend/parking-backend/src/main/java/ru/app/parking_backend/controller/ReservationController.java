@@ -24,15 +24,16 @@ public class ReservationController {
     }
 
     @PostMapping
-    public void saveReservation(Integer carId, Integer parkingSpaceId){
-        reservationService.saveReservation(carId, parkingSpaceId);
+    public void saveReservation(@RequestParam Integer carId, @RequestParam Integer parkingId){
+        reservationService.saveReservation(carId, parkingId);
     }
     @PatchMapping("/{id}/release")
-    public void releaseReservation(Integer id){
+    public void releaseReservation(@PathVariable Integer id){
         reservationService.releaseReservation(id);
     }
+
     @PatchMapping("/{id}/payment")
-    public void payReservation(Integer id){
+    public void payReservation(@PathVariable Integer id){
         reservationService.payReservation(id);
     }
 
