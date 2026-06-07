@@ -33,6 +33,11 @@ public class CarRepository {
         jdbcTemplate.update(sql, car.numberCar(), car.clientId());
     }
 
+    public void updateCarNumber(Integer id, String newCarNumber) {
+        String sql = "update cars set number_car = ? where id = ?";
+        jdbcTemplate.update(sql, newCarNumber, id);
+    }
+
     public void deleteCar(Integer id){
         String sql = "delete from cars where id = ?";
         jdbcTemplate.update(sql, id);

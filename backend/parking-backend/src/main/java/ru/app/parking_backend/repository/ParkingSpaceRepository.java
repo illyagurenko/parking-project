@@ -35,6 +35,11 @@ public class ParkingSpaceRepository {
         jdbcTemplate.update(sql, parkingSpace.numberSpace());
     }
 
+    public void updateParkingSpaceNumber(Integer id, String newParkingSpaceNumber) {
+        String sql = "update cars set number_car = ? where id = ?";
+        jdbcTemplate.update(sql, newParkingSpaceNumber, id);
+    }
+
     public void deleteParkingSpace(Integer id){
         String sql = "delete from parking_spaces where id = ?";
         jdbcTemplate.update(sql, id);

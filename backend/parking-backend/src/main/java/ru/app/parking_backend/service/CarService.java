@@ -26,6 +26,10 @@ public class CarService {
         return car;
     }
 
+    public void updateCarNumber(Integer id, String newCarNumber) {
+        carRepository.updateCarNumber(id, newCarNumber);
+    }
+
     public void deleteCar(Integer id){
         carRepository.deleteCar(id);
     }

@@ -30,6 +30,11 @@ public class ParkingSpaceController {
         return parkingSpaceService.saveParkingSpace(space);
     }
 
+    @PutMapping("/{id}")
+    public void updateParkingSpaceNumber(@PathVariable Integer id, @RequestBody String newParkingSpaceNumber){
+        parkingSpaceService.updateParkingSpaceNumber(id, newParkingSpaceNumber);
+    }
+
     @DeleteMapping("/{id}")
     public void deleteParkingSpace(Integer id){
         parkingSpaceService.deleteParkingSpace(id);

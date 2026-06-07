@@ -27,6 +27,10 @@ public class ClientService {
         clientRepository.saveClient(client);
         return client;
     }
+    public void updateClientName(Integer id, String newFullName) {
+        clientRepository.updateClientName(id, newFullName);
+    }
+
 
     public void deleteClient(Integer id){
         clientRepository.deleteClient(id);

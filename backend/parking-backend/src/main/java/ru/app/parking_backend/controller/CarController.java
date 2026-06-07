@@ -29,6 +29,12 @@ public class CarController {
     public Car saveCar(@RequestBody Car car){
         return carService.saveCar(car);
     }
+
+    @PutMapping("/{id}")
+    public void updateCarNumber(@PathVariable Integer id, @RequestBody String newCarNumber){
+        carService.updateCarNumber(id, newCarNumber);
+    }
+
     @DeleteMapping("/{id}")
     public void deleteCar(Integer id){
         carService.deleteCar(id);

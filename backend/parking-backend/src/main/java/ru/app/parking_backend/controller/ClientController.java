@@ -30,6 +30,11 @@ public class ClientController {
         return clientService.saveClient(client);
     }
 
+    @PutMapping("/{id}")
+    public void updateClientName(@PathVariable Integer id, @RequestBody String newFullName){
+        clientService.updateClientName(id, newFullName);
+    }
+
     @DeleteMapping("/{id}")
     public void deleteClient(Integer id){
         clientService.deleteClient(id);

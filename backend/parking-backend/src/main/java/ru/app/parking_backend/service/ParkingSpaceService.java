@@ -28,6 +28,10 @@ public class ParkingSpaceService {
         return space;
     }
 
+    public void updateParkingSpaceNumber(Integer id, String newParkingSpaceNumber) {
+        parkingSpaceRepository.updateParkingSpaceNumber(id, newParkingSpaceNumber);
+    }
+
     public void deleteParkingSpace(Integer id){
         parkingSpaceRepository.deleteParkingSpace(id);
     }

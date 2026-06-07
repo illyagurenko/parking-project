@@ -34,6 +34,11 @@ public class ClientRepository {
         jdbcTemplate.update(sql, client.fullName());
     }
 
+    public void updateClientName(Integer id, String newFullName) {
+        String sql = "update cars set number_car = ? where id = ?";
+        jdbcTemplate.update(sql, newFullName, id);
+    }
+
     public void deleteClient(Integer id){
         String sql = "delete from clients where id = ?";
         jdbcTemplate.update(sql, id);
