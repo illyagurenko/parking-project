@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import { useCarStore } from '../stores/carStore' 
-import { useClientStore } from '../stores/clientStore'
+import type { CarWithClient } from '../types';
 
 import Card from 'primevue/card'
 import InputText from 'primevue/inputtext'
@@ -11,7 +11,6 @@ import Column from 'primevue/column'
 import Dialog from 'primevue/dialog'
 
 const carStore = useCarStore()
-const clientStore = useClientStore()
 
 const carNumber = ref<string>('')
 const fullName = ref<string>('')
@@ -28,22 +27,9 @@ const editCarNumber = ref<string>('')
 
 const loadAllData = () => {
   carStore.fetchCars()
-  clientStore.fetchClients()
 }
 
-// Логика объединения таблиц автомобилей и их владельцев
-const combinedCarsData = computed(() => {
-  if (!carStore.cars || !Array.isArray(carStore.cars)) return []
-  return carStore.cars.map(car => {
-    const client = clientStore.clients.find(c => c.id === car.clientId)
-    return {
-      ...car,
-      clientFullName: client ? client.fullName : 'Неизвестный клиент'
-    }
-  })
-})
-
-const onEditCarClick = (car: any) => {
+const onEditCarClick = (car: CarWithClient) => {
   editingCarId.value = car.id
   editCarNumber.value = car.numberCar
   editCarOwnerName.value = car.clientFullName // Записываем ФИО владельца для справки
@@ -70,43 +56,23 @@ const onSaveCarEdit = async () => {
 const onAddClientAndCar = async () => {
   if (!fullName.value.trim() || !carNumber.value.trim()) return
 
-  const targetedName = fullName.value.trim()
-
   try {
-    // 1. Поиск существующего клиента на бэкенде
-    await clientStore.fetchClientByFullName(targetedName)
+    await carStore.addCarWithClient({
+      numberCar: carNumber.value.trim(),
+      fullName: fullName.value.trim()
+    })
     
-    let existingClient = clientStore.clients.find(
-      c => c.fullName.toLowerCase() === targetedName.toLowerCase()
-    )
-
-    let finalClientId: number | null = existingClient ? existingClient.id : null
-
-    // 2. Если клиент не найден, создаем новую запись
-    if (!finalClientId) {
-      await clientStore.addClients(targetedName)
-      
-      const newClient = clientStore.clients.find(
-        c => c.fullName.toLowerCase() === targetedName.toLowerCase()
-      )
-      if (newClient) finalClientId = newClient.id
-    }
-
-    // 3. Создаем автомобиль с привязкой к ID клиента
-    if (finalClientId) {
-      await carStore.addCars(carNumber.value.trim(), finalClientId)
-      
-      // Очистка полей ввода
-      carNumber.value = ''
-      fullName.value = ''
-      
-      // Восстанавливаем полный список клиентов в сторе
-      await clientStore.fetchClients()
+    // Очистка полей
+    carNumber.value = ''
+    fullName.value = ''
+  } catch (error: any) {
+    if (error.response?.status === 409) {
+      alert('Машина с таким номером уже существует')
+    } else if (error.response?.status === 400) {
+      alert('Проверьте правильность заполнения полей')
     } else {
-      console.error('Ошибка: не удалось определить ID клиента')
+      alert('Ошибка при добавлении: ' + (error.message || 'Неизвестная ошибка'))
     }
-  } catch (error) {
-    console.error('Ошибка при обработке формы:', error)
   }
 }
 
@@ -118,12 +84,21 @@ const onResetSearch = async () => {
 }
 
 // Поиск автомобиля по государственному номеру
+const isLoading = ref(false)
+
 const onSearchCar = async () => {
-  if (!searchCarNumber.value.trim()) {
-    await carStore.fetchCars()
-    return
+  isLoading.value = true
+  try {
+    if (!searchCarNumber.value.trim()) {
+      await carStore.fetchCars()
+    } else {
+      await carStore.fetchCarsByNumber(searchCarNumber.value.trim())
+    }
+  } catch (error) {
+    console.error('Ошибка поиска:', error)
+  } finally {
+    isLoading.value = false  // ← гарантированно сбросится
   }
-  await carStore.fetchCarsByNumber(searchCarNumber.value.trim())
 }
 
 // Поиск владельца по ФИО и фильтрация его автомобилей
@@ -131,20 +106,19 @@ const onSearchClient = async () => {
   const query = searchFullName.value.trim()
   
   if (!query) {
-    await loadAllData()
+    await carStore.fetchCars()
     return
   }
 
-  await clientStore.fetchClientByFullName(query)
-
-  if (clientStore.clients.length > 0) {
-    const foundClientId = clientStore.clients[0].id
+  try {
+    await carStore.fetchCarsByOwnerName(query)
     
-    await carStore.fetchCars() 
-    carStore.cars = carStore.cars.filter(car => car.clientId === foundClientId)
-  } else {
-    carStore.cars = []
-    alert('Владелец с таким ФИО не найден!')
+    if (carStore.cars.length === 0) {
+      alert('Автомобили с таким владельцем не найдены')
+    }
+  } catch (error) {
+    console.error('Ошибка поиска:', error)
+    alert('Ошибка при поиске')
   }
 }
 </script>
@@ -207,7 +181,7 @@ const onSearchClient = async () => {
       </div>
 
       <!-- Таблица автомобилей -->
-<DataTable :value="combinedCarsData" class="p-datatable-sm" stripedRows>
+<DataTable :value="carStore.cars" :loading="isLoading" class="p-datatable-sm" stripedRows>
         <Column field="id" header="ID автомобиля" />
         <Column field="numberCar" header="Гос. номер" />
         <Column field="clientFullName" header="ФИО Владельца" />

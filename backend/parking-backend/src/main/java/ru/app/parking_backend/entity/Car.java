@@ -6,4 +6,5 @@ public record Car (
         String numberCar,
         Integer clientId
 ) {
+
 }

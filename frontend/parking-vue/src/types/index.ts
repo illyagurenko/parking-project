@@ -1,7 +1,6 @@
-export interface Car{
-    id: number,
-    numberCar: string,
-    clientId: number
+export interface AddCarWithClientPayload {
+    numberCar: string;
+    fullName: string;
 }
 
 export interface Client{
@@ -12,4 +11,11 @@ export interface Client{
 export interface ParkingSpace{
     id: number,
     numberSpace: string,
+}
+
+export interface CarWithClient {
+    id: number;
+    numberCar: string;
+    clientId: number;
+    clientFullName: string;
 }

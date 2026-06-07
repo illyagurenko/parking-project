@@ -1,13 +1,13 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import axios from 'axios'
-import type { Client } from '../types';
+import type { ParkingSpace } from '../types';
 
 const API_URL = 'http://localhost:8080/api/parking';
 
 
 export const useParkingStore = defineStore('parkingStore', () => {
-  const spaces = ref<Client[]>([]);
+  const spaces = ref<ParkingSpace[]>([]);
 
   async function fetchSpaces() {
     const response = await axios.get(API_URL)
