@@ -2,11 +2,12 @@ package ru.app.parking_backend.repository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import ru.app.parking_backend.entity.Car;
-import ru.app.parking_backend.entity.Client;
 import ru.app.parking_backend.entity.ParkingSpace;
 
+import java.sql.PreparedStatement;
 import java.util.List;
 
 @Repository
@@ -30,9 +31,16 @@ public class ParkingSpaceRepository {
         return jdbcTemplate.query(sql, parkingSpaceRowMapper, numberSpace.toUpperCase());
     }
 
-    public void saveParkingSpace(ParkingSpace parkingSpace){
+    public ParkingSpace saveParkingSpace(ParkingSpace parkingSpace){
         String sql = "insert into parking_spaces (number_space) values (?)";
-        jdbcTemplate.update(sql, parkingSpace.numberSpace());
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        jdbcTemplate.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement(sql, new String[]{"id"});
+            ps.setString(1, parkingSpace.numberSpace());
+            return ps;
+        }, keyHolder);
+        Integer generatedId = keyHolder.getKey().intValue();
+        return new ParkingSpace(generatedId, parkingSpace.numberSpace());
     }
 
     public void updateParkingSpaceNumber(Integer id, String newParkingSpaceNumber) {

@@ -3,10 +3,13 @@ package ru.app.parking_backend.repository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import ru.app.parking_backend.dto.CarWithClientDTO;
 import ru.app.parking_backend.entity.Car;
 
+import java.sql.PreparedStatement;
 import java.util.List;
 
 @Repository
@@ -23,14 +26,9 @@ public class CarRepository {
     private final RowMapper<CarWithClientDTO> carWithClientDTO = (rs, rowNum) -> new CarWithClientDTO(
             rs.getInt("id"),
             rs.getString("number_car"),
-            rs.getInt("client_id"),
+            rs.getObject("client_id", Integer.class),
             rs.getString("client_full_name")
     );
-
-//    public List<Car> findAllCar(){
-//        String sql = "select * from cars";
-//        return jdbcTemplate.query(sql, carRowMapper);
-//    }
 
     public List<Car> findCarByNumber(String carNumber){
         String sql = "select * from cars where upper(number_car) = ?";
@@ -44,8 +42,15 @@ public class CarRepository {
 
     public Car saveCar(Car car) {
         String sql = "insert into cars (number_car, client_id) values (?, ?)";
-        jdbcTemplate.update(sql, car.numberCar(), car.clientId());
-        return car;
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        jdbcTemplate.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement(sql, new String[]{"id"});
+            ps.setString(1, car.numberCar());
+            ps.setObject(2, car.clientId());
+            return ps;
+        }, keyHolder);
+        Integer generatedId = keyHolder.getKey().intValue();
+        return new Car(generatedId, car.numberCar(), car.clientId());
     }
 
     public void updateCarNumber(Integer id, String newCarNumber) {
@@ -60,7 +65,7 @@ public class CarRepository {
 
     public List<CarWithClientDTO> findAllWithClient() {
         String sql = """
-                SELECT c.id, c.number_car, c.client_id, 
+                SELECT c.id, c.number_car, c.client_id,
                        cl.full_name AS client_full_name
                 FROM cars c
                 LEFT JOIN clients cl ON c.client_id = cl.id
@@ -70,27 +75,34 @@ public class CarRepository {
     }
 
     public List<CarWithClientDTO> findByNumberCarWithClient(String numberCar) {
-
         String sql = """
                 SELECT c.id, c.number_car, c.client_id, cl.full_name AS client_full_name
                 FROM cars c
                 LEFT JOIN clients cl ON c.client_id = cl.id
-                WHERE c.number_car = ?
+                WHERE upper(c.number_car) = ?
                 """;
-        return jdbcTemplate.query(sql, carWithClientDTO, numberCar);
+        return jdbcTemplate.query(sql, carWithClientDTO, numberCar.toUpperCase());
     }
 
     public List<CarWithClientDTO> findByClientId(Integer clientId) {
         String sql = """
-        SELECT c.id, c.number_car, c.client_id, cl.full_name AS client_full_name
-        FROM cars c
-        LEFT JOIN clients cl ON c.client_id = cl.id
-        WHERE c.client_id = ?
-        ORDER BY c.id
-        """;
+                SELECT c.id, c.number_car, c.client_id, cl.full_name AS client_full_name
+                FROM cars c
+                LEFT JOIN clients cl ON c.client_id = cl.id
+                WHERE c.client_id = ?
+                ORDER BY c.id
+                """;
         return jdbcTemplate.query(sql, carWithClientDTO, clientId);
     }
+
+    public List<CarWithClientDTO> findByClientName(String clientName) {
+        String sql = """
+                SELECT c.id, c.number_car, c.client_id, cl.full_name AS client_full_name
+                FROM cars c
+                LEFT JOIN clients cl ON c.client_id = cl.id
+                WHERE upper(cl.full_name) like ?
+                ORDER BY c.id
+                """;
+        return jdbcTemplate.query(sql, carWithClientDTO, "%" + clientName.toUpperCase() + "%");
+    }
 }
-
-
-
