@@ -12,25 +12,29 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class ClientService {
 
-    private final ClientRepository clientRepository;
+    private final ClientRepository repository;
 
-    public List<Client> findAll(String name) {
+    // эта функция возвращает всех клиентов или ищет по имени если есть параметр
+    public List<Client> getAllClients(String name) {
         if (name != null && !name.trim().isEmpty()) {
-            return clientRepository.searchByName(name);
+            return repository.searchByName(name);
         }
-        return clientRepository.findAll();
+        return repository.findAll();
     }
 
-    public void create(Client client) {
-        clientRepository.save(client);
+    public Optional<Client> getClientById(Integer id) {
+        return repository.findById(id);
+    }
+    public Client saveClient(Client client) {
+        return repository.save(client);
     }
 
     public void update(Integer id, Client client) {
         Client upClient = new Client(id, client.fullName());
-        clientRepository.update(upClient);
+        repository.update(upClient);
     }
 
     public void delete(Integer id) {
-        clientRepository.delete(id);
+        repository.delete(id);
     }
 }

@@ -11,26 +11,26 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class ParkingSpaceService {
 
-    private final ParkingSpaceRepository parkingSpaceRepository;
+    private final ParkingSpaceRepository repository;
 
     public List<ParkingSpace> findAll() {
-        return parkingSpaceRepository.findAll();
+        return repository.findAll();
     }
 
     public List<ParkingSpace> listAvailable() {
-        return parkingSpaceRepository.findAvailable();
+        return repository.findAvailable();
     }
 
     public void create(ParkingSpace space) {
-        parkingSpaceRepository.save(space);
+        repository.save(space);
     }
 
     public void update(Integer id, ParkingSpace space) {
         ParkingSpace upParkingSpace = new ParkingSpace(id, space.numberSpace());
-        parkingSpaceRepository.update(space);
+        repository.update(space);
     }
 
     public void delete(Integer id) {
-        parkingSpaceRepository.delete(id);
+        repository.delete(id);
     }
 }

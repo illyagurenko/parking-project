@@ -6,31 +6,36 @@ import ru.app.parking_backend.service.ClientService;
 
 import java.util.List;
 
-
 @RestController
 @RequestMapping("/api/clients")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "http://localhost:5173")
 public class ClientController {
-    private final ClientService clientService;
+    private final ClientService service;
 
     @GetMapping
-    public List<Client> list(@RequestParam(required = false) String name) {
-        return clientService.findAll(name);
+    public List<Client> getAll(@RequestParam(required = false) String search) {
+        return service.getAllClients(search);
+    }
+
+    @GetMapping("/{id}")
+    public Client getById(@PathVariable Integer id) {
+        return service.getClientById(id).orElse(null);
     }
 
     @PostMapping
-    public void create(@RequestBody Client client) {
-        clientService.create(client);
+    public Client create(@RequestBody Client client) {
+        return service.saveClient(client);
     }
 
     @PutMapping("/{id}")
-    public void update(@PathVariable Integer id, @RequestBody Client client) {
-        clientService.update(id, client);
+    public Client update(@PathVariable Integer id, @RequestBody Client client) {
+        Client updatedClient = new Client(id, client.fullName());
+        return service.saveClient(updatedClient);
     }
 
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Integer id) {
-        clientService.delete(id);
+        service.delete(id);
     }
 }
