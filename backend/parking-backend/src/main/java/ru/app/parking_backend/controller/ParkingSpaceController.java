@@ -11,30 +11,35 @@ import java.util.List;
 @RequiredArgsConstructor
 @CrossOrigin(origins = "http://localhost:5173")
 public class ParkingSpaceController {
-    private final ParkingSpaceService parkingSpaceService;
+    private final ParkingSpaceService service;
 
     @GetMapping
-    public List<ParkingSpace> list() {
-        return parkingSpaceService.findAll();
+    public List<ParkingSpace> getAll() {
+        return service.findAll();
     }
 
-    @GetMapping("/available")
-    public List<ParkingSpace> listAvailable() {
-        return parkingSpaceService.listAvailable();
+    // эта функция делает запрос на получение места по его id
+    @GetMapping("/{id}")
+    public ParkingSpace getById(@PathVariable Integer id) {
+        return service.getSpaceById(id).orElse(null);
     }
 
+    // эта функция сохраняет новое место в базу
     @PostMapping
-    public void create(@RequestBody ParkingSpace space) {
-        parkingSpaceService.create(space);
+    public ParkingSpace create(@RequestBody ParkingSpace parkingSpace) {
+        return service.saveSpace(parkingSpace);
     }
 
+    // эта функция обновляет парковочное место
     @PutMapping("/{id}")
-    public void update(@PathVariable Integer id, @RequestBody ParkingSpace space) {
-        parkingSpaceService.update(id, space);
+    public ParkingSpace update(@PathVariable Integer id, @RequestBody ParkingSpace parkingSpace) {
+        ParkingSpace updatedSpace = new ParkingSpace(id, parkingSpace.numberSpace());
+        return service.saveSpace(updatedSpace);
     }
 
+    // эта функция удаляет место из базы
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Integer id) {
-        parkingSpaceService.delete(id);
+        service.delete(id);
     }
 }

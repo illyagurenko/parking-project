@@ -55,9 +55,7 @@ public class ClientRepository {
             return client;
         }
     }
-    public void update(Client client) {
-        jdbc.update("UPDATE clients SET full_name = ? WHERE id = ?", client.fullName(), client.id());
-    }
+
 
     public void delete(Integer id) {
         jdbc.update("DELETE FROM clients WHERE id = ?", id);

@@ -84,10 +84,6 @@ public class CarRepository {
         }
     }
 
-    public void update(Car car) {
-        jdbc.update("UPDATE cars SET number_car = ?, client_id = ? WHERE id = ?",
-                car.numberCar(), car.clientId(), car.id());
-    }
 
     public void delete(Integer id) {
         jdbc.update("DELETE FROM cars WHERE id = ?", id);

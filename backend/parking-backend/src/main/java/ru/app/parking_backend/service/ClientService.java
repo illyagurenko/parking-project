@@ -29,10 +29,6 @@ public class ClientService {
         return repository.save(client);
     }
 
-    public void update(Integer id, Client client) {
-        Client upClient = new Client(id, client.fullName());
-        repository.update(upClient);
-    }
 
     public void delete(Integer id) {
         repository.delete(id);

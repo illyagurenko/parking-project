@@ -17,17 +17,12 @@ public class ParkingSpaceService {
         return repository.findAll();
     }
 
-    public List<ParkingSpace> listAvailable() {
-        return repository.findAvailable();
+    public Optional<ParkingSpace> getSpaceById(Integer id) {
+        return repository.findById(id);
     }
 
-    public void create(ParkingSpace space) {
-        repository.save(space);
-    }
-
-    public void update(Integer id, ParkingSpace space) {
-        ParkingSpace upParkingSpace = new ParkingSpace(id, space.numberSpace());
-        repository.update(space);
+    public ParkingSpace saveSpace(ParkingSpace parkingSpace) {
+        return repository.save(parkingSpace);
     }
 
     public void delete(Integer id) {
