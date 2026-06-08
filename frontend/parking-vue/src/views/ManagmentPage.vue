@@ -12,8 +12,8 @@
         <div class="search-bar">
           <InputText v-model="clientSearch" placeholder="Search by full name..." @input="fetchClients" />
         </div>
-        <DataTable :value="store.clients" class="p-datatable-sm" responsiveLayout="scroll">
-          <Column field="id" header="ID"></Column>
+      <DataTable :value="store.clients" class="p-datatable-sm" responsiveLayout="scroll" paginator :rows="10">
+          <Column field="id" header="ID"></Column>          <Column field="id" header="ID"></Column>
           <Column field="fullName" header="Full Name"></Column>
           <Column header="Actions">
             <template #body="slotProps">
@@ -33,8 +33,7 @@
         <div class="search-bar">
           <InputText v-model="carSearch" placeholder="Search by number..." @input="fetchCars" />
         </div>
-        <DataTable :value="store.cars" class="p-datatable-sm" responsiveLayout="scroll">
-          <Column field="id" header="ID"></Column>
+        <DataTable :value="store.cars" class="p-datatable-sm" responsiveLayout="scroll" paginator :rows="10">          <Column field="id" header="ID"></Column>
           <Column field="numberCar" header="Number"></Column>
           <Column field="clientFullName" header="Owner"></Column>
           <Column header="Actions">
@@ -52,7 +51,7 @@
           <h3>Parking Spaces</h3>
           <Button icon="pi pi-plus" label="Add Space" @click="openSpaceDialog()" size="small" />
         </div>
-        <DataTable :value="store.parkingSpaces" class="p-datatable-sm" responsiveLayout="scroll">
+        <DataTable :value="store.parkingSpaces" class="p-datatable-sm" responsiveLayout="scroll" paginator :rows="10">
           <Column field="id" header="ID"></Column>
           <Column field="numberSpace" header="Space Number"></Column>
           <Column header="Actions">
@@ -84,11 +83,8 @@
         <InputText id="numberCar" v-model="carForm.numberCar" autofocus />
       </div>
       <div class="field">
-        <label>Owner (Client ID)</label>
-        <select v-model="carForm.clientId" class="simple-select">
-          <option :value="null">No Owner</option>
-          <option v-for="c in store.clients" :key="c.id" :value="c.id">{{ c.fullName }}</option>
-        </select>
+        <label>Owner (Client)</label>
+        <Select v-model="carForm.clientId" :options="store.clients" optionLabel="fullName" optionValue="id" filter showClear placeholder="Select an owner" style="width: 100%" />
       </div>
       <template #footer>
         <Button label="Cancel" icon="pi pi-times" class="p-button-text" @click="carDialog = false" />
@@ -119,6 +115,7 @@ import Column from 'primevue/column'
 import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
 import Dialog from 'primevue/dialog'
+import Select from 'primevue/select'
 
 const store = useManagementStore()
 
@@ -273,12 +270,5 @@ const deleteSpace = (id: number) => {
 .field .p-inputtext {
   width: 100%;
 }
-.simple-select {
-  width: 100%;
-  padding: 0.5rem;
-  border-radius: var(--p-border-radius);
-  border: 1px solid var(--p-content-border-color);
-  background: var(--p-surface-0);
-  color: var(--p-text-color);
-}
+
 </style>

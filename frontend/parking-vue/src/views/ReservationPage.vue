@@ -11,7 +11,7 @@
         <Button icon="pi pi-plus" label="New Reservation" @click="openDialog()" />
       </div>
 
-      <DataTable :value="store.reservations" class="p-datatable-sm" responsiveLayout="scroll">
+      <DataTable :value="store.reservations" class="p-datatable-sm" responsiveLayout="scroll" paginator :rows="10">
         <Column field="id" header="ID"></Column>
         <Column field="parkingNumber" header="Space"></Column>
         <Column field="carNumber" header="Car"></Column>
@@ -44,15 +44,13 @@
     <Dialog v-model:visible="resDialog" :header="editing ? 'Edit Reservation' : 'New Reservation'" modal :style="{width: '500px'}">
       <div class="field">
         <label>Parking Space</label>
-        <select v-model="resForm.parkingId" class="simple-select">
-          <option v-for="s in mgmtStore.parkingSpaces" :key="s.id" :value="s.id">{{ s.numberSpace }}</option>
-        </select>
+        <Select v-model="resForm.parkingId" :options="mgmtStore.parkingSpaces" optionLabel="numberSpace" optionValue="id" filter placeholder="Select Space" style="width: 100%" />
+
       </div>
       <div class="field">
         <label>Car</label>
-        <select v-model="resForm.carId" class="simple-select">
-          <option v-for="c in mgmtStore.cars" :key="c.id" :value="c.id">{{ c.numberCar }} ({{ c.clientFullName || 'No owner' }})</option>
-        </select>
+        <Select v-model="resForm.carId" :options="carOptions" optionLabel="label" optionValue="value" filter placeholder="Select Car" style="width: 100%" />
+
       </div>
       <div class="field-checkbox">
         <label style="display:flex; align-items:center; gap: 0.5rem">
@@ -61,7 +59,7 @@
       </div>
       <div class="field">
         <label>End Time (optional to release)</label>
-        <input type="datetime-local" v-model="resForm.endTimeLocal" class="simple-select" />
+        <input type="datetime-local" v-model="resForm.endTimeLocal" style="padding:0.5rem; width:100%; border:1px solid #ccc; border-radius:4px" />
       </div>
       <template #footer>
         <Button label="Cancel" icon="pi pi-times" class="p-button-text" @click="resDialog = false" />
@@ -72,7 +70,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useReservationStore } from '../stores/reservationStore'
 import { useManagementStore } from '../stores/managementStore'
 import DataTable from 'primevue/datatable'
@@ -80,6 +78,7 @@ import Column from 'primevue/column'
 import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
 import Dialog from 'primevue/dialog'
+import Select from 'primevue/select'
 
 const store = useReservationStore()
 const mgmtStore = useManagementStore()
@@ -93,6 +92,13 @@ onMounted(() => {
   mgmtStore.fetchCars()
 })
 
+const carOptions = computed(() => {
+  return mgmtStore.cars.map(c => ({
+    label: `${c.numberCar} (${c.clientFullName || 'No owner'})`,
+    value: c.id
+  }))
+})
+
 // эта функция делает запрос на получение всех бронирований
 const fetchReservations = () => {
   store.fetchReservations(carSearch.value, clientSearch.value)
@@ -100,7 +106,7 @@ const fetchReservations = () => {
 
 const resDialog = ref(false)
 const editing = ref(false)
-const resForm = ref({ id: null, parkingId: null, carId: null, isPaid: false, endTimeLocal: '' })
+const resForm = ref({ id: null, parkingId: null as number | null, carId: null as number | null, isPaid: false, endTimeLocal: '' })
 
 // эта функция открывает окно для брони
 const openDialog = (res?: any) => {
@@ -169,14 +175,7 @@ const togglePayment = (res: any) => {
   margin-bottom: 0.5rem;
   font-weight: 500;
 }
-.simple-select {
-  width: 100%;
-  padding: 0.5rem;
-  border-radius: var(--p-border-radius);
-  border: 1px solid var(--p-content-border-color);
-  background: var(--p-surface-0);
-  color: var(--p-text-color);
-}
+
 .field-checkbox {
   margin-bottom: 1.5rem;
 }
