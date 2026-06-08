@@ -15,17 +15,17 @@ public class ClientService {
     private final ClientRepository repository;
 
     // эта функция возвращает всех клиентов или ищет по имени если есть параметр
-    public List<Client> getAllClients(String name) {
+    public List<Client> findAll(String name) {
         if (name != null && !name.trim().isEmpty()) {
             return repository.searchByName(name);
         }
         return repository.findAll();
     }
 
-    public Optional<Client> getClientById(Integer id) {
+    public Optional<Client> findById(Integer id) {
         return repository.findById(id);
     }
-    public Client saveClient(Client client) {
+    public Client save(Client client) {
         return repository.save(client);
     }
 

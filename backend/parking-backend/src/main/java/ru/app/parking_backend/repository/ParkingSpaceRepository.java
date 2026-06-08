@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 import ru.app.parking_backend.entity.ParkingSpace;
 
 import java.sql.PreparedStatement;
+import java.sql.Statement;
 import java.util.List;
 import java.util.Optional;
 

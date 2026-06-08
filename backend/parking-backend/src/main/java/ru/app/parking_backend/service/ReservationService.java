@@ -7,29 +7,31 @@ import ru.app.parking_backend.entity.Reservation;
 import ru.app.parking_backend.repository.ReservationRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class ReservationService {
 
-    private final ReservationRepository reservationRepository;
+    private final ReservationRepository repository;
 
-    public List<ReservationDto> listActive(String reserv) {
-        if (reserv != null && !reserv.trim().isEmpty()) {
-            return reservationRepository.searchActive(reserv);
+    // эта функция возвращает все бронирования или ищет их по фильтрам
+    public List<ReservationDto> findAll(String carNumber, String clientFullName) {
+        if ((carNumber != null && !carNumber.isEmpty()) || (clientFullName != null && !clientFullName.isEmpty())) {
+            return repository.search(carNumber, clientFullName);
         }
-        return reservationRepository.findAllActive();
+        return repository.findAll();
     }
 
-    public void create(Reservation reservation) {
-        reservationRepository.create(reservation);
+    public Optional<Reservation> findById(Integer id) {
+        return repository.findById(id);
     }
 
-    public void updatePayment(Integer id, boolean isPaid) {
-        reservationRepository.updatePayment(id, isPaid);
+    public Reservation save(Reservation reservation) {
+        return repository.save(reservation);
     }
 
-    public void releaseSpace(Integer id) {
-        reservationRepository.releaseSpace(id);
+    public void delete(Integer id) {
+        repository.delete(id);
     }
 }

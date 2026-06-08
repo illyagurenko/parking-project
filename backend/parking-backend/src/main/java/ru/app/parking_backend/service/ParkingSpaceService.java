@@ -17,11 +17,11 @@ public class ParkingSpaceService {
         return repository.findAll();
     }
 
-    public Optional<ParkingSpace> getSpaceById(Integer id) {
+    public Optional<ParkingSpace> findById(Integer id) {
         return repository.findById(id);
     }
 
-    public ParkingSpace saveSpace(ParkingSpace parkingSpace) {
+    public ParkingSpace save(ParkingSpace parkingSpace) {
         return repository.save(parkingSpace);
     }
 

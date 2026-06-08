@@ -14,24 +14,24 @@ public class ClientController {
     private final ClientService service;
 
     @GetMapping
-    public List<Client> getAll(@RequestParam(required = false) String search) {
-        return service.getAllClients(search);
+    public List<Client> findAll(@RequestParam(required = false) String search) {
+        return service.findAll(search);
     }
 
     @GetMapping("/{id}")
-    public Client getById(@PathVariable Integer id) {
-        return service.getClientById(id).orElse(null);
+    public Client findById(@PathVariable Integer id) {
+        return service.findById(id).orElse(null);
     }
 
     @PostMapping
-    public Client create(@RequestBody Client client) {
-        return service.saveClient(client);
+    public Client save(@RequestBody Client client) {
+        return service.save(client);
     }
 
     @PutMapping("/{id}")
     public Client update(@PathVariable Integer id, @RequestBody Client client) {
         Client updatedClient = new Client(id, client.fullName());
-        return service.saveClient(updatedClient);
+        return service.save(updatedClient);
     }
 
     @DeleteMapping("/{id}")

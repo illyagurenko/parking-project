@@ -14,27 +14,27 @@ public class ParkingSpaceController {
     private final ParkingSpaceService service;
 
     @GetMapping
-    public List<ParkingSpace> getAll() {
+    public List<ParkingSpace> findAll() {
         return service.findAll();
     }
 
     // эта функция делает запрос на получение места по его id
     @GetMapping("/{id}")
-    public ParkingSpace getById(@PathVariable Integer id) {
-        return service.getSpaceById(id).orElse(null);
+    public ParkingSpace findById(@PathVariable Integer id) {
+        return service.findById(id).orElse(null);
     }
 
     // эта функция сохраняет новое место в базу
     @PostMapping
-    public ParkingSpace create(@RequestBody ParkingSpace parkingSpace) {
-        return service.saveSpace(parkingSpace);
+    public ParkingSpace save(@RequestBody ParkingSpace parkingSpace) {
+        return service.save(parkingSpace);
     }
 
     // эта функция обновляет парковочное место
     @PutMapping("/{id}")
     public ParkingSpace update(@PathVariable Integer id, @RequestBody ParkingSpace parkingSpace) {
         ParkingSpace updatedSpace = new ParkingSpace(id, parkingSpace.numberSpace());
-        return service.saveSpace(updatedSpace);
+        return service.save(updatedSpace);
     }
 
     // эта функция удаляет место из базы

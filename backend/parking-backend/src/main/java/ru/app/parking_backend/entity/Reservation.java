@@ -2,13 +2,14 @@ package ru.app.parking_backend.entity;
 
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 public record Reservation (
         Integer id,
         Integer parkingId,
         Integer carId,
-        boolean isPaid,
-        LocalDateTime startTime,
-        LocalDateTime endTime
+        Boolean isPaid,
+        OffsetDateTime startTime,
+        OffsetDateTime endTime
 ) {
 }

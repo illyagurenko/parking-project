@@ -13,26 +13,40 @@ import java.util.List;
 @RequiredArgsConstructor
 @CrossOrigin(origins = "http://localhost:5173")
 public class ReservationController {
-    private final ReservationService reservationService;
+    private final ReservationService service;
 
+    // функция обрабатывает гет запрос на получение списка бронирований с поиском
     @GetMapping
-    public List<ReservationDto> listActive(@RequestParam(required = false) String reserv) {
-        return reservationService.listActive(reserv);
+    public List<ReservationDto> findAll(@RequestParam(required = false) String carNumber,
+                                       @RequestParam(required = false) String clientFullName) {
+        return service.findAll(carNumber, clientFullName);
     }
 
-    // Принимает сущность Reservation для записи в БД (достаточно прислать parkingId, carId, isPaid)
+    @GetMapping("/{id}")
+    public Reservation findById(@PathVariable Integer id) {
+        return service.findById(id).orElse(null);
+    }
+
     @PostMapping
-    public void create(@RequestBody Reservation reservation) {
-        reservationService.create(reservation);
+    public Reservation save(@RequestBody Reservation reservation) {
+        return service.save(reservation);
     }
 
-    @PutMapping("/{id}/pay")
-    public void updatePayment(@PathVariable Integer id, @RequestParam boolean isPaid) {
-        reservationService.updatePayment(id, isPaid);
+    @PutMapping("/{id}")
+    public Reservation update(@PathVariable Integer id, @RequestBody Reservation reservation) {
+        Reservation updatedReservation = new Reservation(
+                id,
+                reservation.parkingId(),
+                reservation.carId(),
+                reservation.isPaid(),
+                reservation.startTime(),
+                reservation.endTime()
+        );
+        return service.save(updatedReservation);
     }
 
-    @PutMapping("/{id}/release")
-    public void release(@PathVariable Integer id) {
-        reservationService.releaseSpace(id);
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable Integer id) {
+        service.delete(id);
     }
 }
