@@ -91,26 +91,16 @@ public class ReservationRepository {
     // сохраняет бронь
     public Reservation save(Reservation res) {
         if (res.id() == null) {
-            // keyholder нужен чтобы после вставки получить id который база сама сгенерировала
-            // благодаря preparedStatement база возвращает ключи и мы сохраняем их в keyholder
-            // потом достаем id и ставим его объекту машины
-            KeyHolder keyHolder = new GeneratedKeyHolder();
-            jdbc.update(connection -> {
-                PreparedStatement ps = connection.prepareStatement(
-                        "INSERT INTO reservations (parking_id, car_id, is_paid, start_time, end_time) VALUES (?, ?, ?, ?, ?)",
-                        Statement.RETURN_GENERATED_KEYS);
-                ps.setLong(1, res.parkingId());
-                ps.setLong(2, res.carId());
-                ps.setBoolean(3, res.isPaid() != null ? res.isPaid() : false);
-                ps.setTimestamp(4, res.startTime() != null ? Timestamp.from(res.startTime().toInstant()) : new Timestamp(System.currentTimeMillis()));
-                if (res.endTime() != null) {
-                    ps.setTimestamp(5, Timestamp.from(res.endTime().toInstant()));
-                } else {
-                    ps.setNull(5, Types.TIMESTAMP);
-                }
-                return ps;
-            }, keyHolder);
-            int newId = ((Number) keyHolder.getKeys().get("id")).intValue();
+            // делаем вставку и сразу возвращаем сгенерированный id через postgresql RETURNING id
+            Integer newId = jdbc.queryForObject(
+                    "INSERT INTO reservations (parking_id, car_id, is_paid, start_time, end_time) VALUES (?, ?, ?, ?, ?) RETURNING id",
+                    Integer.class,
+                    res.parkingId(),
+                    res.carId(),
+                    res.isPaid() != null ? res.isPaid() : false,
+                    res.startTime() != null ? Timestamp.from(res.startTime().toInstant()) : new Timestamp(System.currentTimeMillis()),
+                    res.endTime() != null ? Timestamp.from(res.endTime().toInstant()) : null
+            );
             return new Reservation(newId, res.parkingId(), res.carId(), res.isPaid(), res.startTime(), res.endTime());
         } else {
             // выполняет запрос на обновление

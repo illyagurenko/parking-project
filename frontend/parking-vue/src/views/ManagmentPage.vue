@@ -128,9 +128,9 @@ onMounted(() => {
   store.fetchParkingSpaces()
 })
 
-// эта функция делает запрос на получение списка клиентов
+// запрос на получение списка клиентов
 const fetchClients = () => store.fetchClients(clientSearch.value)
-// эта функция делает запрос на получение списка машин
+// запрос на получение списка машин
 const fetchCars = () => store.fetchCars(carSearch.value)
 
 // Client Logic
@@ -138,7 +138,7 @@ const clientDialog = ref(false)
 const editingClient = ref(false)
 const clientForm = ref({ id: null, fullName: '' })
 
-// эта функция открывает окно для добавления или редактирования клиента
+// открывает окно для добавления или редактирования клиента
 const openClientDialog = (client?: any) => {
   if (client) {
     editingClient.value = true
@@ -149,7 +149,7 @@ const openClientDialog = (client?: any) => {
   }
   clientDialog.value = true
 }
-// эта функция сохраняет клиента
+
 const saveClient = () => {
   if (editingClient.value) {
     store.updateClient(clientForm.value.id!, clientForm.value)
@@ -158,7 +158,7 @@ const saveClient = () => {
   }
   clientDialog.value = false
 }
-// эта функция удаляет клиента
+
 const deleteClient = (id: number) => {
   if(confirm('Are you sure?')) store.deleteClient(id)
 }
@@ -168,7 +168,7 @@ const carDialog = ref(false)
 const editingCar = ref(false)
 const carForm = ref({ id: null, numberCar: '', clientId: null })
 
-// эта функция открывает окно для добавления или редактирования машины
+// открывает окно для добавления или редактирования машины
 const openCarDialog = (car?: any) => {
   if (car) {
     editingCar.value = true
@@ -179,7 +179,7 @@ const openCarDialog = (car?: any) => {
   }
   carDialog.value = true
 }
-// эта функция сохраняет машину
+
 const saveCar = () => {
   if (editingCar.value) {
     store.updateCar(carForm.value.id!, carForm.value)
@@ -188,7 +188,7 @@ const saveCar = () => {
   }
   carDialog.value = false
 }
-// эта функция удаляет машину
+
 const deleteCar = (id: number) => {
   if(confirm('Are you sure?')) store.deleteCar(id)
 }
@@ -198,7 +198,7 @@ const spaceDialog = ref(false)
 const editingSpace = ref(false)
 const spaceForm = ref({ id: null, numberSpace: 'N_' })
 
-// эта функция открывает окно для добавления или редактирования места
+// открывает окно для добавления или редактирования места
 const openSpaceDialog = (space?: any) => {
   if (space) {
     editingSpace.value = true
@@ -209,7 +209,6 @@ const openSpaceDialog = (space?: any) => {
   }
   spaceDialog.value = true
 }
-// эта функция сохраняет парковочное место
 const saveSpace = () => {
   if (editingSpace.value) {
     store.updateParkingSpace(spaceForm.value.id!, spaceForm.value)
@@ -218,7 +217,6 @@ const saveSpace = () => {
   }
   spaceDialog.value = false
 }
-// эта функция удаляет парковочное место
 const deleteSpace = (id: number) => {
   if(confirm('Are you sure?')) store.deleteParkingSpace(id)
 }

@@ -3,15 +3,11 @@ package ru.app.parking_backend.repository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import ru.app.parking_backend.dto.CarDto;
 import ru.app.parking_backend.entity.Car;
 
-import java.sql.PreparedStatement;
-import java.sql.Statement;
-import java.sql.Types;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -58,21 +54,12 @@ public class CarRepository {
     // сохранение/обновление машины
     public Car save(Car car) {
         if (car.id() == null) {
-            // keyholder нужен чтобы после вставки получить id который база сама сгенерировала
-            // благодаря preparedStatement база возвращает ключи и мы сохраняем их в keyholder
-            // потом достаем id и ставим его объекту машины
-            KeyHolder keyHolder = new GeneratedKeyHolder();
-            jdbc.update(connection -> {
-                PreparedStatement ps = connection.prepareStatement("INSERT INTO cars (number_car, client_id) VALUES (?, ?)", Statement.RETURN_GENERATED_KEYS);
-                ps.setString(1, car.numberCar());
-                if (car.clientId() != null) {
-                    ps.setInt(2, car.clientId());
-                } else {
-                    ps.setNull(2, Types.INTEGER);
-                }
-                return ps;
-            }, keyHolder);
-            int newId = ((Number) keyHolder.getKeys().get("id")).intValue();
+            // делаем вставку и сразу возвращаем сгенерированный id через postgresql RETURNING id
+            Integer newId = jdbc.queryForObject(
+                    "INSERT INTO cars (number_car, client_id) VALUES (?, ?) RETURNING id",
+                    Integer.class,
+                    car.numberCar(), car.clientId()
+            );
             return new Car(newId, car.numberCar(), car.clientId());
         } else {
             // делает запрос на обновление записи если id уже есть

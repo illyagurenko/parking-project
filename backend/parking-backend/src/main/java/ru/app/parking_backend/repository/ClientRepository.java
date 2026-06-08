@@ -38,16 +38,12 @@ public class ClientRepository {
 
     public Client save(Client client) {
         if (client.id() == null) {
-            // keyholder нужен чтобы после вставки получить id который база сама сгенерировала
-            // благодаря preparedStatement база возвращает ключи и мы сохраняем их в keyholder
-            // потом достаем id и ставим его объекту машины
-            KeyHolder keyHolder = new GeneratedKeyHolder();
-            jdbc.update(connection -> {
-                PreparedStatement ps = connection.prepareStatement("INSERT INTO clients (full_name) VALUES (?)", Statement.RETURN_GENERATED_KEYS);
-                ps.setString(1, client.fullName());
-                return ps;
-            }, keyHolder);
-            int newId = ((Number) keyHolder.getKeys().get("id")).intValue();
+            // делаем вставку и сразу возвращаем сгенерированный id через postgresql RETURNING id
+            Integer newId = jdbc.queryForObject(
+                    "INSERT INTO clients (full_name) VALUES (?) RETURNING id",
+                    Integer.class,
+                    client.fullName()
+            );
             return new Client(newId, client.fullName());
         } else {
             // обновляет запись если она уже существует
@@ -55,7 +51,6 @@ public class ClientRepository {
             return client;
         }
     }
-
 
     public void delete(Integer id) {
         jdbc.update("DELETE FROM clients WHERE id = ?", id);

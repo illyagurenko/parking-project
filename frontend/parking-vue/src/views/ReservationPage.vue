@@ -99,7 +99,7 @@ const carOptions = computed(() => {
   }))
 })
 
-// эта функция делает запрос на получение всех бронирований
+// запрос на получение всех бронирований
 const fetchReservations = () => {
   store.fetchReservations(carSearch.value, clientSearch.value)
 }
@@ -108,7 +108,7 @@ const resDialog = ref(false)
 const editing = ref(false)
 const resForm = ref({ id: null, parkingId: null as number | null, carId: null as number | null, isPaid: false, endTimeLocal: '' })
 
-// эта функция открывает окно для брони
+// функция открывает окно для брони
 const openDialog = (res?: any) => {
   if (res) {
     editing.value = true
@@ -123,7 +123,6 @@ const openDialog = (res?: any) => {
   resDialog.value = true
 }
 
-// эта функция сохраняет бронь
 const saveRes = () => {
   const payload = {
     ...resForm.value,
@@ -137,12 +136,11 @@ const saveRes = () => {
   resDialog.value = false
 }
 
-// эта функция удаляет бронь
 const deleteRes = (id: number) => {
   if(confirm('Are you sure?')) store.deleteReservation(id)
 }
 
-// эта функция переключает статус оплаты
+// функция переключает статус оплаты
 const togglePayment = (res: any) => {
   store.togglePayment(res.id, res)
 }

@@ -33,16 +33,12 @@ public class ParkingSpaceRepository {
 
     public ParkingSpace save(ParkingSpace parkingSpace) {
         if (parkingSpace.id() == null) {
-            // keyholder нужен чтобы после вставки получить id который база сама сгенерировала
-            // благодаря preparedStatement база возвращает ключи и мы сохраняем их в keyholder
-            // потом достаем id и ставим его объекту машины
-            KeyHolder keyHolder = new GeneratedKeyHolder();
-            jdbc.update(connection -> {
-                PreparedStatement ps = connection.prepareStatement("INSERT INTO parking_spaces (number_space) VALUES (?)", Statement.RETURN_GENERATED_KEYS);
-                ps.setString(1, parkingSpace.numberSpace());
-                return ps;
-            }, keyHolder);
-            int newId = ((Number) keyHolder.getKeys().get("id")).intValue();
+            // делаем вставку и сразу возвращаем сгенерированный id через postgresql RETURNING id
+            Integer newId = jdbc.queryForObject(
+                    "INSERT INTO parking_spaces (number_space) VALUES (?) RETURNING id",
+                    Integer.class,
+                    parkingSpace.numberSpace()
+            );
             return new ParkingSpace(newId, parkingSpace.numberSpace());
         } else {
             // обновляет место

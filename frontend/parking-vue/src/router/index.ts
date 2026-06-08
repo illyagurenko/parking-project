@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import ManagementPage from '../views/ManagmentPage.vue'
 import ReservationPage from '../views/ReservationPage.vue'
 
-//  функция создает роутер для навигации по страницам приложения
+// функция создает роутер для навигации по страницам приложения
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
