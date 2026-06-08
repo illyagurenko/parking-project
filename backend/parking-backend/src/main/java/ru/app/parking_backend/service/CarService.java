@@ -6,30 +6,31 @@ import ru.app.parking_backend.entity.Car;
 import ru.app.parking_backend.repository.CarRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 
 @Service
 @RequiredArgsConstructor
 public class CarService {
-    private final CarRepository carRepository;
+    private final CarRepository repository;
 
-    public List<CarDto> findAllCarWithClient(String number) {
-        if (number != null && !number.trim().isEmpty()) {
-            return carRepository.searchCarByNumber(number);
+    // возвращает список машин или ищет их по номеру
+    public List<CarDto> getAllCars(String search) {
+        if (search != null && !search.isEmpty()) {
+            return repository.searchByNumber(search);
         }
-        return carRepository.findAllCarWithClient();
+        return repository.findAll();
     }
 
-    public void create(Car car) {
-        carRepository.save(car);
+    public Optional<Car> getCarById(Integer id) {
+        return repository.findById(id);
     }
 
-    public void update(Integer id, Car car) {
-        Car newCar = new Car(id, car.numberCar(), car.clientId());
-        carRepository.update(newCar);
+    public Car saveCar(Car car) {
+        return repository.save(car);
     }
 
-    public void delete(Integer id) {
-        carRepository.delete(id);
+    public void deleteCar(Integer id) {
+        repository.delete(id);
     }
 }

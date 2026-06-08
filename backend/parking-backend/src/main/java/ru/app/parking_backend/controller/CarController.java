@@ -15,25 +15,31 @@ import java.util.List;
 @RequiredArgsConstructor
 @CrossOrigin(origins = "http://localhost:5173")
 public class CarController {
-    private final CarService carService;
+    private final CarService service;
 
     @GetMapping
-    public List<CarDto> list(@RequestParam(required = false) String number) {
-        return carService.findAllCarWithClient(number);
+    public List<CarDto> getAll(@RequestParam(required = false) String search) {
+        return service.getAllCars(search);
+    }
+
+    @GetMapping("/{id}")
+    public Car getById(@PathVariable Integer id) {
+        return service.getCarById(id).orElse(null);
     }
 
     @PostMapping
-    public void create(@RequestBody Car car) {
-        carService.create(car);
+    public Car create(@RequestBody Car car) {
+        return service.saveCar(car);
     }
 
     @PutMapping("/{id}")
-    public void update(@PathVariable Integer id, @RequestBody Car car) {
-        carService.update(id, car);
+    public Car update(@PathVariable Integer id, @RequestBody Car car) {
+        Car updatedCar = new Car(id, car.numberCar(), car.clientId());
+        return service.saveCar(updatedCar);
     }
 
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Integer id) {
-        carService.delete(id);
+        service.deleteCar(id);
     }
 }
