@@ -13,7 +13,6 @@ import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.sql.Types;
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.List;
@@ -54,7 +53,7 @@ public class ReservationRepository {
         );
     };
 
-    // делает запрос для получения всех броней со связанными данными
+    // запрос для получения всех броней со связанными данными
     public List<ReservationDto> findAll() {
         String sql = "SELECT r.*, p.number_space as parking_number, c.number_car as car_number, c.client_id as client_id, cl.full_name as client_full_name " +
                 "FROM reservations r " +
@@ -65,7 +64,7 @@ public class ReservationRepository {
         return jdbc.query(sql, dtoMapper);
     }
 
-    // выполняет динамический запрос поиска по номеру и владельцу
+    // запрос поиска по номеру и владельцу
     public List<ReservationDto> search(String carNumber, String clientFullName) {
         String sql = "SELECT r.*, p.number_space as parking_number, c.number_car as car_number, c.client_id as client_id, cl.full_name as client_full_name " +
                 "FROM reservations r " +
@@ -84,7 +83,6 @@ public class ReservationRepository {
         return jdbc.query(sql, dtoMapper);
     }
 
-    // запрашивает бронь по id
     public Optional<Reservation> findById(Integer id) {
         List<Reservation> list = jdbc.query("SELECT * FROM reservations WHERE id = ?", rowMapper, id);
         return list.stream().findFirst();
@@ -93,9 +91,9 @@ public class ReservationRepository {
     // сохраняет бронь
     public Reservation save(Reservation res) {
         if (res.id() == null) {
-            // keyholder это контейнер куда драйвер базы данных сложит сгенерированный id
-            // он нужен чтобы после создания записи сразу вернуть клиенту объект с уже заполненным id
-            // без него мы бы не знали под каким id сохранилась запись
+            // keyholder нужен чтобы после вставки получить id который база сама сгенерировала
+            // благодаря preparedStatement база возвращает ключи и мы сохраняем их в keyholder
+            // потом достаем id и ставим его объекту машины
             KeyHolder keyHolder = new GeneratedKeyHolder();
             jdbc.update(connection -> {
                 PreparedStatement ps = connection.prepareStatement(
@@ -129,7 +127,6 @@ public class ReservationRepository {
         }
     }
 
-    // удаляет бронь
     public void delete(Integer id) {
         jdbc.update("DELETE FROM reservations WHERE id = ?", id);
     }

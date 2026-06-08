@@ -1,5 +1,6 @@
 package ru.app.parking_backend.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ru.app.parking_backend.dto.CarDto;
@@ -28,12 +29,12 @@ public class CarController {
     }
 
     @PostMapping
-    public Car save(@RequestBody Car car) {
+    public Car save(@Valid @RequestBody Car car) {
         return service.save(car);
     }
 
     @PutMapping("/{id}")
-    public Car update(@PathVariable Integer id, @RequestBody Car car) {
+    public Car update(@PathVariable Integer id, @Valid @RequestBody Car car) {
         Car updatedCar = new Car(id, car.numberCar(), car.clientId());
         return service.save(updatedCar);
     }

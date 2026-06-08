@@ -1,4 +1,5 @@
 package ru.app.parking_backend.controller;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ru.app.parking_backend.entity.Client;
@@ -24,12 +25,12 @@ public class ClientController {
     }
 
     @PostMapping
-    public Client save(@RequestBody Client client) {
+    public Client save(@Valid @RequestBody Client client) {
         return service.save(client);
     }
 
     @PutMapping("/{id}")
-    public Client update(@PathVariable Integer id, @RequestBody Client client) {
+    public Client update(@PathVariable Integer id, @Valid  @RequestBody Client client) {
         Client updatedClient = new Client(id, client.fullName());
         return service.save(updatedClient);
     }

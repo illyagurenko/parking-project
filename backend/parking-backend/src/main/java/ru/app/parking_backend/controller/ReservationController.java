@@ -1,4 +1,5 @@
 package ru.app.parking_backend.controller;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ru.app.parking_backend.dto.ReservationDto;
@@ -15,7 +16,6 @@ import java.util.List;
 public class ReservationController {
     private final ReservationService service;
 
-    // функция обрабатывает гет запрос на получение списка бронирований с поиском
     @GetMapping
     public List<ReservationDto> findAll(@RequestParam(required = false) String carNumber,
                                        @RequestParam(required = false) String clientFullName) {
@@ -28,12 +28,12 @@ public class ReservationController {
     }
 
     @PostMapping
-    public Reservation save(@RequestBody Reservation reservation) {
+    public Reservation save(@Valid @RequestBody Reservation reservation) {
         return service.save(reservation);
     }
 
     @PutMapping("/{id}")
-    public Reservation update(@PathVariable Integer id, @RequestBody Reservation reservation) {
+    public Reservation update(@PathVariable Integer id, @Valid  @RequestBody Reservation reservation) {
         Reservation updatedReservation = new Reservation(
                 id,
                 reservation.parkingId(),

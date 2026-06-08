@@ -33,10 +33,9 @@ public class ParkingSpaceRepository {
 
     public ParkingSpace save(ParkingSpace parkingSpace) {
         if (parkingSpace.id() == null) {
-            // keyholder это объект для захвата ключей сгенерированных базой данных
-            // при создании записи через insert мы не знаем какой id будет у записи
-            // база присвоит id сама и вернет его нам через preparedstatement
-            // мы заберем его из keyholder и создадим новый record
+            // keyholder нужен чтобы после вставки получить id который база сама сгенерировала
+            // благодаря preparedStatement база возвращает ключи и мы сохраняем их в keyholder
+            // потом достаем id и ставим его объекту машины
             KeyHolder keyHolder = new GeneratedKeyHolder();
             jdbc.update(connection -> {
                 PreparedStatement ps = connection.prepareStatement("INSERT INTO parking_spaces (number_space) VALUES (?)", Statement.RETURN_GENERATED_KEYS);

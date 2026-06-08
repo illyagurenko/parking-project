@@ -15,7 +15,7 @@ public class ReservationService {
 
     private final ReservationRepository repository;
 
-    // эта функция возвращает все бронирования или ищет их по фильтрам
+    // функция возвращает все бронирования или ищет их по фильтрам
     public List<ReservationDto> findAll(String carNumber, String clientFullName) {
         if ((carNumber != null && !carNumber.isEmpty()) || (clientFullName != null && !clientFullName.isEmpty())) {
             return repository.search(carNumber, clientFullName);

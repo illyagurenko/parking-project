@@ -38,9 +38,9 @@ public class ClientRepository {
 
     public Client save(Client client) {
         if (client.id() == null) {
-            // здесь мы используем keyholder для получения сгенерированного базой данных id при вставке новой записи
-            // мы передаем preparedstatement с флагом который просит вернуть сгенерированные ключи
-            // после выполнения запроса мы достаем сгенерированный id из keyholder и создаем новый record
+            // keyholder нужен чтобы после вставки получить id который база сама сгенерировала
+            // благодаря preparedStatement база возвращает ключи и мы сохраняем их в keyholder
+            // потом достаем id и ставим его объекту машины
             KeyHolder keyHolder = new GeneratedKeyHolder();
             jdbc.update(connection -> {
                 PreparedStatement ps = connection.prepareStatement("INSERT INTO clients (full_name) VALUES (?)", Statement.RETURN_GENERATED_KEYS);

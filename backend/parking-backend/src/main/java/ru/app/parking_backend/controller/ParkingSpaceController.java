@@ -1,4 +1,5 @@
 package ru.app.parking_backend.controller;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ru.app.parking_backend.entity.ParkingSpace;
@@ -18,26 +19,22 @@ public class ParkingSpaceController {
         return service.findAll();
     }
 
-    // эта функция делает запрос на получение места по его id
     @GetMapping("/{id}")
     public ParkingSpace findById(@PathVariable Integer id) {
         return service.findById(id).orElse(null);
     }
 
-    // эта функция сохраняет новое место в базу
     @PostMapping
-    public ParkingSpace save(@RequestBody ParkingSpace parkingSpace) {
+    public ParkingSpace save(@Valid @RequestBody ParkingSpace parkingSpace) {
         return service.save(parkingSpace);
     }
 
-    // эта функция обновляет парковочное место
     @PutMapping("/{id}")
-    public ParkingSpace update(@PathVariable Integer id, @RequestBody ParkingSpace parkingSpace) {
+    public ParkingSpace update(@PathVariable Integer id, @Valid  @RequestBody ParkingSpace parkingSpace) {
         ParkingSpace updatedSpace = new ParkingSpace(id, parkingSpace.numberSpace());
         return service.save(updatedSpace);
     }
 
-    // эта функция удаляет место из базы
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Integer id) {
         service.delete(id);
