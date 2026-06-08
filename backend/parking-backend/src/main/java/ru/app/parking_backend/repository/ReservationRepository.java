@@ -37,17 +37,22 @@ public class ReservationRepository {
         );
     };
 
-    private final RowMapper<ReservationDto> dtoMapper = (rs, rowNum) -> new ReservationDto(
-        rs.getInt("id"),
-        rs.getInt("parking_id"),
-        rs.getString("number_space"),
-        rs.getInt("car_id"),
-        rs.getString("number_car"),
-        rs.getString("full_name"),
-        rs.getBoolean("is_paid"),
-        rs.getObject("start_time", OffsetDateTime.class),
-        rs.getObject("end_time", OffsetDateTime.class)
-);
+    private final RowMapper<ReservationDto> dtoMapper = (rs, rowNum) -> {
+        Timestamp startTs = rs.getTimestamp("start_time");
+        Timestamp endTs = rs.getTimestamp("end_time");
+        return new ReservationDto(
+                rs.getInt("id"),
+                rs.getInt("parking_id"),
+                rs.getString("parking_number"),
+                rs.getInt("car_id"),
+                rs.getString("car_number"),
+                rs.getInt("client_id"),
+                rs.getString("client_full_name"),
+                rs.getBoolean("is_paid"),
+                startTs != null ? OffsetDateTime.ofInstant(startTs.toInstant(), ZoneId.systemDefault()) : null,
+                endTs != null ? OffsetDateTime.ofInstant(endTs.toInstant(), ZoneId.systemDefault()) : null
+        );
+    };
 
     // делает запрос для получения всех броней со связанными данными
     public List<ReservationDto> findAll() {

@@ -7,9 +7,9 @@ import ru.app.parking_backend.service.ParkingSpaceService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/parking")
+@RequestMapping("/api/parking-spaces")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = "*")
 public class ParkingSpaceController {
     private final ParkingSpaceService service;
 
