@@ -13,7 +13,7 @@
           <InputText v-model="clientSearch" placeholder="Search by full name..." @input="fetchClients" />
         </div>
       <DataTable :value="store.clients" class="p-datatable-sm" responsiveLayout="scroll" paginator :rows="10">
-          <Column field="id" header="ID"></Column>          <Column field="id" header="ID"></Column>
+          <Column field="id" header="ID"></Column>
           <Column field="fullName" header="Full Name"></Column>
           <Column header="Actions">
             <template #body="slotProps">
