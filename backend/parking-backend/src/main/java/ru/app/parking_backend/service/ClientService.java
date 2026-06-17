@@ -25,10 +25,10 @@ public class ClientService {
     public Optional<Client> findById(Integer id) {
         return repository.findById(id);
     }
+
     public Client save(Client client) {
         return repository.save(client);
     }
-
 
     public void delete(Integer id) {
         repository.delete(id);

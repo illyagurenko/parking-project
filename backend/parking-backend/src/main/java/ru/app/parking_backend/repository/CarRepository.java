@@ -7,7 +7,6 @@ import org.springframework.stereotype.Repository;
 import ru.app.parking_backend.dto.CarDto;
 import ru.app.parking_backend.entity.Car;
 
-
 import java.util.List;
 import java.util.Optional;
 
@@ -21,7 +20,7 @@ public class CarRepository {
     private final RowMapper<Car> rowMapper = (rs, rowNum) -> new Car(
             rs.getInt("id"),
             rs.getString("number_car"),
-            rs.getObject("client_id") != null ? rs.getInt("client_id") : null
+            rs.getObject("client_id", Integer.class)
     );
 
     // маппер DTO
@@ -47,7 +46,7 @@ public class CarRepository {
 
     // поиск машины по номеру используя совпадение ILIKE
     public List<CarDto> searchByNumber(String numberCar) {
-        String sql = "SELECT c.*, cl.full_name as client_full_name FROM cars c LEFT JOIN clients cl ON c.client_id = cl.id WHERE c.number_car ILIKE ?";
+        String sql = "SELECT c.*, cl.full_name FROM cars c LEFT JOIN clients cl ON c.client_id = cl.id WHERE c.number_car ILIKE ?";
         return jdbc.query(sql, dtoMapper, "%" + numberCar + "%");
     }
 
@@ -62,14 +61,26 @@ public class CarRepository {
             );
             return new Car(newId, car.numberCar(), car.clientId());
         } else {
-            // делает запрос на обновление записи если id уже есть
-            jdbc.update("UPDATE cars SET number_car = ?, client_id = ? WHERE id = ?",
-                    car.numberCar(), car.clientId(), car.id());
+            int rowsAffected = jdbc.update("UPDATE cars SET number_car = ?, client_id = ? WHERE id = ?", car.numberCar(), car.clientId(), car.id());
+            if (rowsAffected == 0) {
+                throw new RuntimeException("Машина с id " + car.id() + " не найдена");
+            }
             return car;
         }
     }
 
     public void delete(Integer id) {
-        jdbc.update("DELETE FROM cars WHERE id = ?", id);
+        int rowsAffected = jdbc.update("DELETE FROM cars WHERE id = ?", id);
+        if (rowsAffected == 0) {
+            throw new RuntimeException("Машина с id " + id + " не найдена");
+        }
+    }
+
+    public boolean existById(Integer id) {
+        if (id == null) {
+            return false;
+        }
+        String sql = "SELECT EXISTS(SELECT 1 FROM cars WHERE id = ?)";
+        return Boolean.TRUE.equals(jdbc.queryForObject(sql, Boolean.class, id));
     }
 }

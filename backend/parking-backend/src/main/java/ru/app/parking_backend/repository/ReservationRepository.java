@@ -3,16 +3,11 @@ package ru.app.parking_backend.repository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import ru.app.parking_backend.dto.ReservationDto;
 import ru.app.parking_backend.entity.Reservation;
 
-import java.sql.PreparedStatement;
-import java.sql.Statement;
 import java.sql.Timestamp;
-import java.sql.Types;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.List;
@@ -60,7 +55,7 @@ public class ReservationRepository {
                 "JOIN parking_spaces p ON r.parking_id = p.id " +
                 "JOIN cars c ON r.car_id = c.id " +
                 "LEFT JOIN clients cl ON c.client_id = cl.id " +
-                "ORDER BY r.id";
+                "ORDER BY r.id DESC";
         return jdbc.query(sql, dtoMapper);
     }
 
@@ -91,20 +86,21 @@ public class ReservationRepository {
     // сохраняет бронь
     public Reservation save(Reservation res) {
         if (res.id() == null) {
-            // делаем вставку и сразу возвращаем сгенерированный id через postgresql RETURNING id
+            OffsetDateTime startTime = res.startTime() != null ? res.startTime() : OffsetDateTime.now(ZoneId.systemDefault());
+            Boolean isPaid = res.isPaid() != null ? res.isPaid() : false;
+
             Integer newId = jdbc.queryForObject(
                     "INSERT INTO reservations (parking_id, car_id, is_paid, start_time, end_time) VALUES (?, ?, ?, ?, ?) RETURNING id",
                     Integer.class,
                     res.parkingId(),
                     res.carId(),
-                    res.isPaid() != null ? res.isPaid() : false,
-                    res.startTime() != null ? Timestamp.from(res.startTime().toInstant()) : new Timestamp(System.currentTimeMillis()),
+                    isPaid,
+                    Timestamp.from(startTime.toInstant()),
                     res.endTime() != null ? Timestamp.from(res.endTime().toInstant()) : null
             );
-            return new Reservation(newId, res.parkingId(), res.carId(), res.isPaid(), res.startTime(), res.endTime());
+            return new Reservation(newId, res.parkingId(), res.carId(), isPaid, startTime, res.endTime());
         } else {
-            // выполняет запрос на обновление
-            jdbc.update(
+            int rowsAffected = jdbc.update(
                     "UPDATE reservations SET parking_id = ?, car_id = ?, is_paid = ?, start_time = ?, end_time = ? WHERE id = ?",
                     res.parkingId(),
                     res.carId(),
@@ -113,11 +109,25 @@ public class ReservationRepository {
                     res.endTime() != null ? Timestamp.from(res.endTime().toInstant()) : null,
                     res.id()
             );
+            if (rowsAffected == 0) {
+                throw new RuntimeException("Бронь с id " + res.id() + " не найдена");
+            }
             return res;
         }
     }
 
     public void delete(Integer id) {
-        jdbc.update("DELETE FROM reservations WHERE id = ?", id);
+        int rowsAffected = jdbc.update("DELETE FROM reservations WHERE id = ?", id);
+        if (rowsAffected == 0) {
+            throw new RuntimeException("Бронь с id " + id + " не найдена");
+        }
+    }
+
+    public boolean existById(Integer id) {
+        if (id == null) {
+            return false;
+        }
+        String sql = "SELECT EXISTS(SELECT 1 FROM reservations WHERE id = ?)";
+        return Boolean.TRUE.equals(jdbc.queryForObject(sql, Boolean.class, id));
     }
 }

@@ -1,9 +1,8 @@
 package ru.app.parking_backend.repository;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import ru.app.parking_backend.entity.Client;
 
@@ -43,14 +42,27 @@ public class ClientRepository {
             );
             return new Client(newId, client.fullName());
         } else {
-            // обновляет запись если она уже существует
-            jdbc.update("UPDATE clients SET full_name = ? WHERE id = ?", client.fullName(), client.id());
+            int rowsAffected = jdbc.update("UPDATE clients SET full_name = ? WHERE id = ?", client.fullName(), client.id());
+            if (rowsAffected == 0) {
+                throw new RuntimeException("Клиент с id " + client.id() + " не найден");
+            }
             return client;
         }
     }
 
     public void delete(Integer id) {
-        jdbc.update("DELETE FROM clients WHERE id = ?", id);
+        int rowsAffected = jdbc.update("DELETE FROM clients WHERE id = ?", id);
+        if (rowsAffected == 0) {
+            throw new RuntimeException("Клиент с id " + id + " не найден");
+        }
+    }
+
+    public boolean existById(Integer id) {
+        if (id == null) {
+            return false;
+        }
+        String sql = "SELECT EXISTS(SELECT 1 FROM clients WHERE id = ?)";
+        return Boolean.TRUE.equals(jdbc.queryForObject(sql, Boolean.class, id));
     }
 }
 

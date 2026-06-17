@@ -1,14 +1,11 @@
 package ru.app.parking_backend.repository;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import ru.app.parking_backend.entity.ParkingSpace;
 
-import java.sql.PreparedStatement;
-import java.sql.Statement;
 import java.util.List;
 import java.util.Optional;
 
@@ -41,13 +38,26 @@ public class ParkingSpaceRepository {
             );
             return new ParkingSpace(newId, parkingSpace.numberSpace());
         } else {
-            // обновляет место
-            jdbc.update("UPDATE parking_spaces SET number_space = ? WHERE id = ?", parkingSpace.numberSpace(), parkingSpace.id());
+            int rowsAffected = jdbc.update("UPDATE parking_spaces SET number_space = ? WHERE id = ?", parkingSpace.numberSpace(), parkingSpace.id());
+            if (rowsAffected == 0) {
+                throw new RuntimeException("Парковочное место с id " + parkingSpace.id() + " не найдено");
+            }
             return parkingSpace;
         }
     }
 
     public void delete(Integer id) {
-        jdbc.update("DELETE FROM parking_spaces WHERE id = ?", id);
+        int rowsAffected = jdbc.update("DELETE FROM parking_spaces WHERE id = ?", id);
+        if (rowsAffected == 0) {
+            throw new RuntimeException("Парковочное место с id " + id + " не найдено");
+        }
+    }
+
+    public boolean existById(Integer id) {
+        if (id == null) {
+            return false;
+        }
+        String sql = "SELECT EXISTS(SELECT 1 FROM parking_spaces WHERE id = ?)";
+        return Boolean.TRUE.equals(jdbc.queryForObject(sql, Boolean.class, id));
     }
 }
