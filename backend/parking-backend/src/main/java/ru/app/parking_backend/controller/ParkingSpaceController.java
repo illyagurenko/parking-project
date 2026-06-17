@@ -30,7 +30,7 @@ public class ParkingSpaceController {
     }
 
     @PutMapping("/{id}")
-    public ParkingSpace update(@PathVariable Integer id, @Valid  @RequestBody ParkingSpace parkingSpace) {
+    public ParkingSpace update(@PathVariable Integer id, @Valid @RequestBody ParkingSpace parkingSpace) {
         ParkingSpace updatedSpace = new ParkingSpace(id, parkingSpace.numberSpace());
         return service.save(updatedSpace);
     }
