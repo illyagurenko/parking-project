@@ -11,11 +11,21 @@
         <Button icon="pi pi-plus" label="New Reservation" @click="openDialog()" />
       </div>
 
-      <DataTable :value="store.reservations" class="p-datatable-sm" responsiveLayout="scroll" paginator :rows="10">
+      <DataTable 
+        :value="store.reservations" 
+        lazy 
+        paginator 
+        :rows="store.size" 
+        :totalRecords="store.totalReservations"
+        :first="store.page * store.size"
+        @page="onPage"
+        class="p-datatable-sm" 
+        responsiveLayout="scroll"
+      >
         <Column field="id" header="ID"></Column>
-        <Column field="parkingNumber" header="Space"></Column>
-        <Column field="carNumber" header="Car"></Column>
-        <Column field="clientFullName" header="Owner"></Column>
+        <Column field="numberSpace" header="Space"></Column>
+        <Column field="numberCar" header="Car"></Column>
+        <Column field="fullName" header="Owner"></Column>
         <Column header="Time">
           <template #body="slotProps">
             {{ new Date(slotProps.data.startTime).toLocaleString() }} - 
@@ -44,13 +54,11 @@
     <Dialog v-model:visible="resDialog" :header="editing ? 'Edit Reservation' : 'New Reservation'" modal :style="{width: '500px'}">
       <div class="field">
         <label>Parking Space</label>
-        <Select v-model="resForm.parkingId" :options="mgmtStore.parkingSpaces" optionLabel="numberSpace" optionValue="id" filter placeholder="Select Space" style="width: 100%" />
-
+        <Select v-model="resForm.parkingId" :options="mgmtStore.parkingSpacesOptions" optionLabel="numberSpace" optionValue="id" filter placeholder="Select Space" style="width: 100%" />
       </div>
       <div class="field">
         <label>Car</label>
         <Select v-model="resForm.carId" :options="carOptions" optionLabel="label" optionValue="value" filter placeholder="Select Car" style="width: 100%" />
-
       </div>
       <div class="field-checkbox">
         <label style="display:flex; align-items:center; gap: 0.5rem">
@@ -88,42 +96,46 @@ const clientSearch = ref('')
 
 onMounted(() => {
   store.fetchReservations()
-  mgmtStore.fetchParkingSpaces()
-  mgmtStore.fetchCars()
+  mgmtStore.fetchParkingSpacesOptions()
+  mgmtStore.fetchCarsOptions()
 })
 
 const carOptions = computed(() => {
-  return mgmtStore.cars.map(c => ({
+  return mgmtStore.carsOptions.map(c => ({
     label: `${c.numberCar} (${c.clientName || 'No owner'})`,
     value: c.id
   }))
 })
 
-// запрос на получение всех бронирований
+// При вводе сбрасываем страницу на 0
 const fetchReservations = () => {
-  store.fetchReservations(carSearch.value, clientSearch.value)
+  store.fetchReservations(carSearch.value, clientSearch.value, 0, store.size)
+}
+
+const onPage = (event: any) => {
+  store.fetchReservations(carSearch.value, clientSearch.value, event.page, event.rows)
 }
 
 const resDialog = ref(false)
 const editing = ref(false)
 const resForm = ref({ id: null, parkingId: null as number | null, carId: null as number | null, isPaid: false, endTimeLocal: '' })
 
-// функция открывает окно для брони
 const openDialog = (res?: any) => {
   if (res) {
     editing.value = true
-
-
-
     resForm.value = { 
       ...res, 
       endTimeLocal: res.endTime ? new Date(res.endTime).toISOString().slice(0,16) : ''
     }
-
-
   } else {
     editing.value = false
-    resForm.value = { id: null, parkingId: mgmtStore.parkingSpaces[0]?.id || null, carId: mgmtStore.cars[0]?.id || null, isPaid: false, endTimeLocal: '' }
+    resForm.value = { 
+      id: null, 
+      parkingId: mgmtStore.parkingSpacesOptions[0]?.id || null, 
+      carId: mgmtStore.carsOptions[0]?.id || null, 
+      isPaid: false, 
+      endTimeLocal: '' 
+    }
   }
   resDialog.value = true
 }
@@ -145,7 +157,6 @@ const deleteRes = (id: number) => {
   if(confirm('Are you sure?')) store.deleteReservation(id)
 }
 
-// функция переключает статус оплаты
 const togglePayment = (res: any) => {
   store.togglePayment(res.id, res)
 }

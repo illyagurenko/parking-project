@@ -12,7 +12,17 @@
         <div class="search-bar">
           <InputText v-model="clientSearch" placeholder="Search by full name..." @input="fetchClients" />
         </div>
-      <DataTable :value="store.clients" class="p-datatable-sm" responsiveLayout="scroll" paginator :rows="10">
+        <DataTable 
+          :value="store.clients" 
+          lazy 
+          paginator 
+          :rows="store.clientsSize" 
+          :totalRecords="store.totalClients"
+          :first="store.clientsPage * store.clientsSize"
+          @page="onClientPage"
+          class="p-datatable-sm" 
+          responsiveLayout="scroll"
+        >
           <Column field="id" header="ID"></Column>
           <Column field="fullName" header="Full Name"></Column>
           <Column header="Actions">
@@ -33,9 +43,20 @@
         <div class="search-bar">
           <InputText v-model="carSearch" placeholder="Search by number..." @input="fetchCars" />
         </div>
-        <DataTable :value="store.cars" class="p-datatable-sm" responsiveLayout="scroll" paginator :rows="10">          <Column field="id" header="ID"></Column>
+        <DataTable 
+          :value="store.cars" 
+          lazy 
+          paginator 
+          :rows="store.carsSize" 
+          :totalRecords="store.totalCars"
+          :first="store.carsPage * store.carsSize"
+          @page="onCarPage"
+          class="p-datatable-sm" 
+          responsiveLayout="scroll"
+        >          
+          <Column field="id" header="ID"></Column>
           <Column field="numberCar" header="Number"></Column>
-          <Column field="clientName" header="Owner"></Column>
+          <Column field="fullName" header="Owner"></Column>
           <Column header="Actions">
             <template #body="slotProps">
               <Button icon="pi pi-pencil" class="p-button-text p-button-sm" @click="openCarDialog(slotProps.data)" />
@@ -51,7 +72,17 @@
           <h3>Parking Spaces</h3>
           <Button icon="pi pi-plus" label="Add Space" @click="openSpaceDialog()" size="small" />
         </div>
-        <DataTable :value="store.parkingSpaces" class="p-datatable-sm" responsiveLayout="scroll" paginator :rows="10">
+        <DataTable 
+          :value="store.parkingSpaces" 
+          lazy 
+          paginator 
+          :rows="store.parkingSpacesSize" 
+          :totalRecords="store.totalParkingSpaces"
+          :first="store.parkingSpacesPage * store.parkingSpacesSize"
+          @page="onSpacePage"
+          class="p-datatable-sm" 
+          responsiveLayout="scroll"
+        >
           <Column field="id" header="ID"></Column>
           <Column field="numberSpace" header="Space Number"></Column>
           <Column header="Actions">
@@ -84,7 +115,7 @@
       </div>
       <div class="field">
         <label>Owner (Client)</label>
-        <Select v-model="carForm.clientId" :options="store.clients" optionLabel="fullName" optionValue="id" filter showClear placeholder="Select an owner" style="width: 100%" />
+        <Select v-model="carForm.clientId" :options="store.clientsOptions" optionLabel="fullName" optionValue="id" filter showClear placeholder="Select an owner" style="width: 100%" />
       </div>
       <template #footer>
         <Button label="Cancel" icon="pi pi-times" class="p-button-text" @click="carDialog = false" />
@@ -126,19 +157,33 @@ onMounted(() => {
   store.fetchClients()
   store.fetchCars()
   store.fetchParkingSpaces()
+  
+  // Загружаем списки для выпадающих меню
+  store.fetchClientsOptions()
 })
 
-// запрос на получение списка клиентов
-const fetchClients = () => store.fetchClients(clientSearch.value)
-// запрос на получение списка машин
-const fetchCars = () => store.fetchCars(carSearch.value)
+// Поиск сбрасывает страницу на 0
+const fetchClients = () => store.fetchClients(clientSearch.value, 0, store.clientsSize)
+const fetchCars = () => store.fetchCars(carSearch.value, 0, store.carsSize)
+
+// Обработчики пагинации
+const onClientPage = (event: any) => {
+  store.fetchClients(clientSearch.value, event.page, event.rows)
+}
+
+const onCarPage = (event: any) => {
+  store.fetchCars(carSearch.value, event.page, event.rows)
+}
+
+const onSpacePage = (event: any) => {
+  store.fetchParkingSpaces('', event.page, event.rows)
+}
 
 // Client Logic
 const clientDialog = ref(false)
 const editingClient = ref(false)
 const clientForm = ref({ id: null, fullName: '' })
 
-// открывает окно для добавления или редактирования клиента
 const openClientDialog = (client?: any) => {
   if (client) {
     editingClient.value = true
@@ -168,7 +213,6 @@ const carDialog = ref(false)
 const editingCar = ref(false)
 const carForm = ref({ id: null, numberCar: '', clientId: null })
 
-// открывает окно для добавления или редактирования машины
 const openCarDialog = (car?: any) => {
   if (car) {
     editingCar.value = true
@@ -198,7 +242,6 @@ const spaceDialog = ref(false)
 const editingSpace = ref(false)
 const spaceForm = ref({ id: null, numberSpace: 'N_' })
 
-// открывает окно для добавления или редактирования места
 const openSpaceDialog = (space?: any) => {
   if (space) {
     editingSpace.value = true
@@ -268,5 +311,4 @@ const deleteSpace = (id: number) => {
 .field .p-inputtext {
   width: 100%;
 }
-
 </style>

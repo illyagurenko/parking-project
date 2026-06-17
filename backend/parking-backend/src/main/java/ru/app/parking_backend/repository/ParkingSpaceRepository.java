@@ -19,10 +19,6 @@ public class ParkingSpaceRepository {
             rs.getString("number_space")
     );
 
-    public List<ParkingSpace> findAll() {
-        return jdbc.query("SELECT * FROM parking_spaces ORDER BY number_space", rowMapper);
-    }
-
     public Optional<ParkingSpace> findById(Integer id) {
         List<ParkingSpace> spaces = jdbc.query("SELECT * FROM parking_spaces WHERE id = ?", rowMapper, id);
         return spaces.stream().findFirst();
@@ -53,5 +49,31 @@ public class ParkingSpaceRepository {
         }
         String sql = "SELECT EXISTS(SELECT 1 FROM parking_spaces WHERE id = ?)";
         return Boolean.TRUE.equals(jdbc.queryForObject(sql, Boolean.class, id));
+    }
+
+    // постраничный вывод всех парковочных мест
+    public List<ParkingSpace> findAllPaginated(int limit, int offset) {
+        String sql = "SELECT * FROM parking_spaces ORDER BY id DESC LIMIT ? OFFSET ?";
+        return jdbc.query(sql, rowMapper, limit, offset);
+    }
+
+    // подсчет общего количества мест
+    public long countAll() {
+        String sql = "SELECT COUNT(*) FROM parking_spaces";
+        Long count = jdbc.queryForObject(sql, Long.class);
+        return count != null ? count : 0L;
+    }
+
+    // постраничный поиск парковочного места по его номеру
+    public List<ParkingSpace> searchByNumberPaginated(String numberSpace, int limit, int offset) {
+        String sql = "SELECT * FROM parking_spaces WHERE number_space ILIKE ? ORDER BY id DESC LIMIT ? OFFSET ?";
+        return jdbc.query(sql, rowMapper, "%" + numberSpace + "%", limit, offset);
+    }
+
+    // подсчет количества мест, найденных по номеру
+    public long countByNumber(String numberSpace) {
+        String sql = "SELECT COUNT(*) FROM parking_spaces WHERE number_space ILIKE ?";
+        Long count = jdbc.queryForObject(sql, Long.class, "%" + numberSpace + "%");
+        return count != null ? count : 0L;
     }
 }

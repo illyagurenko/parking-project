@@ -5,11 +5,11 @@ import java.time.OffsetDateTime;
 public record ReservationDto(
         Integer id,
         Integer parkingId,
-        String parkingNumber,
+        String numberSpace,
         Integer carId,
-        String carNumber,
+        String numberCar,
         Integer clientId,
-        String clientFullName,
+        String fullName,
         Boolean isPaid,
         OffsetDateTime startTime,
         OffsetDateTime endTime

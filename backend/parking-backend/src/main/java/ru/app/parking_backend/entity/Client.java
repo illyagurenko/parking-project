@@ -8,7 +8,8 @@ public record Client(
         @NotBlank(message = "ФИО не может быть пустым")
         @Size(min = 2, max = 100, message = "Имя должно содержать от 2 до 100 символов")
         String fullName
-){}
+) {
+}
 
 
 

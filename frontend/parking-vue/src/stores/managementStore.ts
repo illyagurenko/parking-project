@@ -1,74 +1,139 @@
 import { defineStore } from 'pinia'
 import { api } from './api'
 
-// объявление хранилища и реактивных переменных пока просто any
 export const useManagementStore = defineStore('management', {
   state: () => ({
+    // Данные для таблиц с пагинацией
     clients: [] as any[],
+    totalClients: 0,
+    clientsPage: 0,
+    clientsSize: 10,
+    clientsSearch: '',
+
     cars: [] as any[],
-    parkingSpaces: [] as any[]
+    totalCars: 0,
+    carsPage: 0,
+    carsSize: 10,
+    carsSearch: '',
+
+    parkingSpaces: [] as any[],
+    totalParkingSpaces: 0,
+    parkingSpacesPage: 0,
+    parkingSpacesSize: 10,
+    parkingSpacesSearch: '',
+
+    // Списки для выпадающих меню (Select)
+    clientsOptions: [] as any[],
+    carsOptions: [] as any[],
+    parkingSpacesOptions: [] as any[]
   }),
   actions: {
-    // запрос на получение списка клиентов
-    async fetchClients(search = '') {
-      const res = await api.get('/clients', { params: { search } })
-      this.clients = res.data
+    // Вспомогательные запросы для выпадающих списков (берем до 100 записей)
+    async fetchClientsOptions() {
+      const res = await api.get('/clients', { params: { size: 100 } })
+      this.clientsOptions = res.data.content
     },
-    // пост запрос на добавление клиента
+    async fetchCarsOptions() {
+      const res = await api.get('/cars', { params: { size: 100 } })
+      this.carsOptions = res.data.content
+    },
+    async fetchParkingSpacesOptions() {
+      const res = await api.get('/parking-spaces', { params: { size: 100 } })
+      this.parkingSpacesOptions = res.data.content
+    },
+
+    // Методы для работы с таблицами (пагинация + поиск)
+    async fetchClients(search?: string, page?: number, size?: number) {
+      if (search !== undefined) this.clientsSearch = search
+      if (page !== undefined) this.clientsPage = page
+      if (size !== undefined) this.clientsSize = size
+
+      const res = await api.get('/clients', {
+        params: {
+          name: this.clientsSearch,
+          page: this.clientsPage,
+          size: this.clientsSize
+        }
+      })
+      this.clients = res.data.content
+      this.totalClients = res.data.totalElements
+    },
     async addClient(client: any) {
       await api.post('/clients', client)
       this.fetchClients()
+      this.fetchClientsOptions()
     },
-    // запрос на изменение клиента
     async updateClient(id: number, client: any) {
       await api.put(`/clients/${id}`, client)
       this.fetchClients()
+      this.fetchClientsOptions()
     },
-    // запрос на удаление клиента
     async deleteClient(id: number) {
       await api.delete(`/clients/${id}`)
       this.fetchClients()
+      this.fetchClientsOptions()
     },
-    // запрос на получение списка машин
-    async fetchCars(search = '') {
-      const res = await api.get('/cars', { params: { search } })
-      this.cars = res.data
+
+    async fetchCars(search?: string, page?: number, size?: number) {
+      if (search !== undefined) this.carsSearch = search
+      if (page !== undefined) this.carsPage = page
+      if (size !== undefined) this.carsSize = size
+
+      const res = await api.get('/cars', {
+        params: {
+          search: this.carsSearch,
+          page: this.carsPage,
+          size: this.carsSize
+        }
+      })
+      this.cars = res.data.content
+      this.totalCars = res.data.totalElements
     },
-    // пост запрос на добавление машины
     async addCar(car: any) {
       await api.post('/cars', car)
       this.fetchCars()
+      this.fetchCarsOptions()
     },
-    // запрос на изменение машины
     async updateCar(id: number, car: any) {
       await api.put(`/cars/${id}`, car)
       this.fetchCars()
+      this.fetchCarsOptions()
     },
-    // запрос на удаление машины
     async deleteCar(id: number) {
       await api.delete(`/cars/${id}`)
       this.fetchCars()
+      this.fetchCarsOptions()
     },
 
-    // запрос на получение всех мест
-    async fetchParkingSpaces() {
-      const res = await api.get('/parking-spaces')
-      this.parkingSpaces = res.data
+    async fetchParkingSpaces(search?: string, page?: number, size?: number) {
+      if (search !== undefined) this.parkingSpacesSearch = search
+      if (page !== undefined) this.parkingSpacesPage = page
+      if (size !== undefined) this.parkingSpacesSize = size
+
+      const res = await api.get('/parking-spaces', {
+        params: {
+          search: this.parkingSpacesSearch,
+          page: this.parkingSpacesPage,
+          size: this.parkingSpacesSize
+        }
+      })
+      this.parkingSpaces = res.data.content
+      this.totalParkingSpaces = res.data.totalElements
     },
-    // пост запрос на добавление парковочного места
     async addParkingSpace(space: any) {
       await api.post('/parking-spaces', space)
       this.fetchParkingSpaces()
+      this.fetchParkingSpacesOptions()
     },
-    // запрос на изменение парковочного места
     async updateParkingSpace(id: number, space: any) {
       await api.put(`/parking-spaces/${id}`, space)
       this.fetchParkingSpaces()
+      this.fetchParkingSpacesOptions()
     },
-    // запрос на удаление парковочного места
     async deleteParkingSpace(id: number) {
       await api.delete(`/parking-spaces/${id}`)
       this.fetchParkingSpaces()
+      this.fetchParkingSpacesOptions()
     }
   }
 })

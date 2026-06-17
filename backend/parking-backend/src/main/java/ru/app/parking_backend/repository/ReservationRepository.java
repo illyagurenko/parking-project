@@ -37,46 +37,16 @@ public class ReservationRepository {
         return new ReservationDto(
                 rs.getInt("id"),
                 rs.getInt("parking_id"),
-                rs.getString("parking_number"),
+                rs.getString("number_space"),
                 rs.getInt("car_id"),
-                rs.getString("car_number"),
+                rs.getString("number_car"),
                 rs.getInt("client_id"),
-                rs.getString("client_full_name"),
+                rs.getString("full_name"),
                 rs.getBoolean("is_paid"),
                 startTs != null ? OffsetDateTime.ofInstant(startTs.toInstant(), ZoneId.systemDefault()) : null,
                 endTs != null ? OffsetDateTime.ofInstant(endTs.toInstant(), ZoneId.systemDefault()) : null
         );
     };
-
-    // запрос для получения всех броней со связанными данными
-    public List<ReservationDto> findAll() {
-        String sql = "SELECT r.*, p.number_space as parking_number, c.number_car as car_number, c.client_id as client_id, cl.full_name as client_full_name " +
-                "FROM reservations r " +
-                "JOIN parking_spaces p ON r.parking_id = p.id " +
-                "JOIN cars c ON r.car_id = c.id " +
-                "LEFT JOIN clients cl ON c.client_id = cl.id " +
-                "ORDER BY r.id DESC";
-        return jdbc.query(sql, dtoMapper);
-    }
-
-    // запрос поиска по номеру и владельцу
-    public List<ReservationDto> search(String carNumber, String clientFullName) {
-        String sql = "SELECT r.*, p.number_space as parking_number, c.number_car as car_number, c.client_id as client_id, cl.full_name as client_full_name " +
-                "FROM reservations r " +
-                "JOIN parking_spaces p ON r.parking_id = p.id " +
-                "JOIN cars c ON r.car_id = c.id " +
-                "LEFT JOIN clients cl ON c.client_id = cl.id " +
-                "WHERE 1=1 ";
-
-        if (carNumber != null && !carNumber.isEmpty()) {
-            sql += " AND c.number_car ILIKE '%" + carNumber + "%' ";
-        }
-        if (clientFullName != null && !clientFullName.isEmpty()) {
-            sql += " AND cl.full_name ILIKE '%" + clientFullName + "%' ";
-        }
-        sql += " ORDER BY r.id";
-        return jdbc.query(sql, dtoMapper);
-    }
 
     public Optional<Reservation> findById(Integer id) {
         List<Reservation> list = jdbc.query("SELECT * FROM reservations WHERE id = ?", rowMapper, id);
@@ -128,36 +98,102 @@ public class ReservationRepository {
     // проверка для конкретной машины
     public boolean hasActiveCar(Integer carId) {
         String sql = """
-            SELECT EXISTS(
-                SELECT 1 FROM reservations 
-                WHERE car_id = ? 
-                AND (end_time IS NULL OR end_time > CURRENT_TIMESTAMP)
-            )
-        """;
+                    SELECT EXISTS(
+                        SELECT 1 FROM reservations 
+                        WHERE car_id = ? 
+                        AND (end_time IS NULL OR end_time > CURRENT_TIMESTAMP)
+                    )
+                """;
         return Boolean.TRUE.equals(jdbc.queryForObject(sql, Boolean.class, carId));
     }
 
     // проверка для клиента
     public boolean hasActiveClient(Integer clientId) {
         String sql = """
-            SELECT EXISTS(
-                SELECT 1 FROM reservations r
-                JOIN cars c ON r.car_id = c.id
-                WHERE c.client_id = ? 
-                AND (r.end_time IS NULL OR r.end_time > CURRENT_TIMESTAMP)
-            )
-        """;
+                    SELECT EXISTS(
+                        SELECT 1 FROM reservations r
+                        JOIN cars c ON r.car_id = c.id
+                        WHERE c.client_id = ? 
+                        AND (r.end_time IS NULL OR r.end_time > CURRENT_TIMESTAMP)
+                    )
+                """;
         return Boolean.TRUE.equals(jdbc.queryForObject(sql, Boolean.class, clientId));
     }
 
     public boolean hasActiveSpace(Integer parkingId) {
         String sql = """
-        SELECT EXISTS(
-            SELECT 1 FROM reservations 
-            WHERE parking_id = ? 
-            AND (end_time IS NULL OR end_time > CURRENT_TIMESTAMP)
-        )
-    """;
+                    SELECT EXISTS(
+                        SELECT 1 FROM reservations 
+                        WHERE parking_id = ? 
+                        AND (end_time IS NULL OR end_time > CURRENT_TIMESTAMP)
+                    )
+                """;
         return Boolean.TRUE.equals(jdbc.queryForObject(sql, Boolean.class, parkingId));
+    }
+
+    public List<ReservationDto> findAllPaginated(int limit, int offset) {
+        String sql = """
+                            SELECT r.id, r.car_id, r.parking_id, r.start_time, r.end_time, r.is_paid,\s
+                                   c.number_car, c.client_id, cl.full_name, p.number_space
+                            FROM reservations r
+                            JOIN cars c ON r.car_id = c.id
+                            JOIN clients cl ON c.client_id = cl.id
+                            JOIN parking_spaces p ON r.parking_id = p.id
+                            ORDER BY r.id DESC\s
+                            LIMIT ? OFFSET ?
+                """;
+        return jdbc.query(sql, dtoMapper, limit, offset);
+    }
+
+    // общий подсчет бронирований
+    public long countAll() {
+        String sql = "SELECT COUNT(*) FROM reservations";
+        Long count = jdbc.queryForObject(sql, Long.class);
+        return count != null ? count : 0L;
+    }
+
+    // постраничный гибкий поиск по двум фильтрам (можно заполнить только один или оба)
+    public List<ReservationDto> searchPaginated(String carNumber, String clientFullName, int limit, int offset) {
+        String sql = """
+                    SELECT r.id, r.car_id, r.parking_id r.start_time, r.end_time, r.is_paid, 
+                           c.number_car, c.client_id, cl.full_name, p.number_space
+                    FROM reservations r
+                    JOIN cars c ON r.car_id = c.id
+                    JOIN clients cl ON c.client_id = cl.id
+                    JOIN parking_spaces p ON r.parking_id = p.id
+                    WHERE (? IS NULL OR c.number_car ILIKE ?)
+                      AND (? IS NULL OR cl.full_name ILIKE ?)
+                    ORDER BY r.id DESC 
+                    LIMIT ? OFFSET ?
+                """;
+
+        // параметры для LIKE
+        String carPattern = carNumber != null ? "%" + carNumber + "%" : null;
+        String clientPattern = clientFullName != null ? "%" + clientFullName + "%" : null;
+
+        return jdbc.query(sql, dtoMapper,
+                carNumber, carPattern,
+                clientFullName, clientPattern,
+                limit, offset);
+    }
+
+    // подсчет количества записей для гибкого поиска
+    public long countSearch(String carNumber, String clientFullName) {
+        String sql = """
+                    SELECT COUNT(*) 
+                    FROM reservations r
+                    JOIN cars c ON r.car_id = c.id
+                    JOIN clients cl ON c.client_id = cl.id
+                    WHERE (? IS NULL OR c.number_car ILIKE ?)
+                      AND (? IS NULL OR cl.full_name ILIKE ?)
+                """;
+
+        String carPattern = carNumber != null ? "%" + carNumber + "%" : null;
+        String clientPattern = clientFullName != null ? "%" + clientFullName + "%" : null;
+
+        Long count = jdbc.queryForObject(sql, Long.class,
+                carNumber, carPattern,
+                clientFullName, clientPattern);
+        return count != null ? count : 0L;
     }
 }

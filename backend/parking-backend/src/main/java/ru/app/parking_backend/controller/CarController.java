@@ -4,12 +4,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ru.app.parking_backend.dto.CarDto;
+import ru.app.parking_backend.dto.PageResponse;
 import ru.app.parking_backend.entity.Car;
 import ru.app.parking_backend.service.CarService;
-
-
-import java.util.List;
-
 
 @RestController
 @RequestMapping("/api/cars")
@@ -19,8 +16,12 @@ public class CarController {
     private final CarService service;
 
     @GetMapping
-    public List<CarDto> findAll(@RequestParam(required = false) String search) {
-        return service.findAll(search);
+    public PageResponse<CarDto> findAll(
+            @RequestParam(required = false) String search,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return service.findAll(search, page, size);
     }
 
     @GetMapping("/{id}")

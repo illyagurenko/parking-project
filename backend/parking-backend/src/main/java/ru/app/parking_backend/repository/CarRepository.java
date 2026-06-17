@@ -10,7 +10,6 @@ import ru.app.parking_backend.entity.Car;
 import java.util.List;
 import java.util.Optional;
 
-
 @Repository
 @RequiredArgsConstructor
 public class CarRepository {
@@ -31,23 +30,10 @@ public class CarRepository {
             rs.getString("full_name")
     );
 
-    // владельцы+авто
-    public List<CarDto> findAll() {
-        String sql = "SELECT c.*, cl.full_name FROM cars c " +
-                "LEFT JOIN clients cl ON c.client_id = cl.id ORDER BY c.id DESC";
-        return jdbc.query(sql, dtoMapper);
-    }
-
     // машина по id
     public Optional<Car> findById(Integer id) {
         List<Car> cars = jdbc.query("SELECT * FROM cars WHERE id = ?", rowMapper, id);
         return cars.stream().findFirst();
-    }
-
-    // поиск машины по номеру используя совпадение ILIKE
-    public List<CarDto> searchByNumber(String numberCar) {
-        String sql = "SELECT c.*, cl.full_name FROM cars c LEFT JOIN clients cl ON c.client_id = cl.id WHERE c.number_car ILIKE ?";
-        return jdbc.query(sql, dtoMapper, "%" + numberCar + "%");
     }
 
     // сохранение/обновление машины
@@ -76,5 +62,44 @@ public class CarRepository {
         }
         String sql = "SELECT EXISTS(SELECT 1 FROM cars WHERE id = ?)";
         return Boolean.TRUE.equals(jdbc.queryForObject(sql, Boolean.class, id));
+    }
+
+    // постраничный вывод всех машин
+    public List<CarDto> findAllPaginated(int limit, int offset) {
+        String sql = """
+                    SELECT c.id, c.number_car, c.client_id, cl.full_name
+                    FROM cars c 
+                    LEFT JOIN clients cl ON c.client_id = cl.id 
+                    ORDER BY c.id DESC 
+                    LIMIT ? OFFSET ?
+                """;
+        return jdbc.query(sql, dtoMapper, limit, offset);
+    }
+
+    // подсчет общего количества машин
+    public long countAll() {
+        String sql = "SELECT COUNT(*) FROM cars";
+        Long count = jdbc.queryForObject(sql, Long.class);
+        return count != null ? count : 0L;
+    }
+
+    // постраничный поиск по номеру машины
+    public List<CarDto> searchByNumberPaginated(String number, int limit, int offset) {
+        String sql = """
+                    SELECT c.id, c.number_car, c.client_id, cl.full_name
+                    FROM cars c 
+                    LEFT JOIN clients cl ON c.client_id = cl.id 
+                    WHERE c.number_car ILIKE ? 
+                    ORDER BY c.id DESC 
+                    LIMIT ? OFFSET ?
+                """;
+        return jdbc.query(sql, dtoMapper, "%" + number + "%", limit, offset);
+    }
+
+    // подсчет количества машин, найденных по номеру
+    public long countByNumber(String number) {
+        String sql = "SELECT COUNT(*) FROM cars WHERE number_car ILIKE ?";
+        Long count = jdbc.queryForObject(sql, Long.class, "%" + number + "%");
+        return count != null ? count : 0L;
     }
 }

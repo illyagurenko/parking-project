@@ -19,17 +19,21 @@ public class ClientRepository {
             rs.getString("full_name")
     );
 
-    public List<Client> findAll() {
-        return jdbc.query("SELECT * FROM clients ORDER BY id DESC", rowMapper);
-    }
-
     public Optional<Client> findById(Integer id) {
         List<Client> clients = jdbc.query("SELECT * FROM clients WHERE id = ?", rowMapper, id);
         return clients.stream().findFirst();
     }
 
-    public List<Client> searchByName(String name) {
-        return jdbc.query("SELECT * FROM clients WHERE full_name ILIKE ? ORDER BY id DESC", rowMapper, "%" + name + "%");
+    public List<Client> searchByNamePaginated(String name, int limit, int offset) {
+        String sql = "SELECT * FROM clients WHERE full_name ILIKE ? ORDER BY id DESC LIMIT ? OFFSET ?";
+        return jdbc.query(sql, rowMapper, "%" + name + "%", limit, offset);
+    }
+
+    // Подсчет количества найденных по имени для п вычисления страниц поиска
+    public long countByName(String name) {
+        String sql = "SELECT COUNT(*) FROM clients WHERE full_name ILIKE ?";
+        Long count = jdbc.queryForObject(sql, Long.class, "%" + name + "%");
+        return count != null ? count : 0L;
     }
 
     public Client save(Client client) {
@@ -57,6 +61,19 @@ public class ClientRepository {
         }
         String sql = "SELECT EXISTS(SELECT 1 FROM clients WHERE id = ?)";
         return Boolean.TRUE.equals(jdbc.queryForObject(sql, Boolean.class, id));
+    }
+
+    // метод для получения страницы
+    public List<Client> findAllPaginated(int limit, int offset) {
+        String sql = "SELECT * FROM clients ORDER BY id DESC LIMIT ? OFFSET ?";
+        return jdbc.query(sql, rowMapper, limit, offset);
+    }
+
+    // метод для подсчета всех записей
+    public long countAll() {
+        String sql = "SELECT COUNT(*) FROM clients";
+        Long count = jdbc.queryForObject(sql, Long.class);
+        return count != null ? count : 0L;
     }
 }
 

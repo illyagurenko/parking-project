@@ -2,6 +2,7 @@ package ru.app.parking_backend.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.app.parking_backend.dto.PageResponse;
 import ru.app.parking_backend.dto.ReservationDto;
 import ru.app.parking_backend.entity.Reservation;
 import ru.app.parking_backend.exception.ResourceNotFoundException;
@@ -15,12 +16,39 @@ public class ReservationService {
 
     private final ReservationRepository repository;
 
-    // функция возвращает все бронирования или ищет их по фильтрам
-    public List<ReservationDto> findAll(String carNumber, String clientFullName) {
-        if ((carNumber != null && !carNumber.isEmpty()) || (clientFullName != null && !clientFullName.isEmpty())) {
-            return repository.search(carNumber, clientFullName);
+    public PageResponse<ReservationDto> findAll(String carNumber, String clientFullName, int page, int size) {
+        if (page < 0) page = 0;
+        if (size < 10) size = 10;
+        if (size > 100) size = 100;
+
+        int offset = page * size;
+
+        List<ReservationDto> content;
+        long totalElements;
+
+        boolean hasCarFilter = carNumber != null && !carNumber.trim().isEmpty();
+        boolean hasClientFilter = clientFullName != null && !clientFullName.trim().isEmpty();
+
+        if (hasCarFilter || hasClientFilter) {
+            String cleanCar = hasCarFilter ? carNumber.trim() : null;
+            String cleanClient = hasClientFilter ? clientFullName.trim() : null;
+
+            content = repository.searchPaginated(cleanCar, cleanClient, size, offset);
+            totalElements = repository.countSearch(cleanCar, cleanClient);
+        } else {
+            content = repository.findAllPaginated(size, offset);
+            totalElements = repository.countAll();
         }
-        return repository.findAll();
+
+        int totalPages = (int) Math.ceil((double) totalElements / size);
+
+        return new PageResponse<>(
+                content,
+                totalElements,
+                totalPages,
+                page,
+                size
+        );
     }
 
     public Reservation findById(Integer id) {

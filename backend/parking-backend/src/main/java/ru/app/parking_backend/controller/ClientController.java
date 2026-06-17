@@ -1,11 +1,11 @@
 package ru.app.parking_backend.controller;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import ru.app.parking_backend.dto.PageResponse;
 import ru.app.parking_backend.entity.Client;
 import ru.app.parking_backend.service.ClientService;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/clients")
@@ -15,8 +15,12 @@ public class ClientController {
     private final ClientService service;
 
     @GetMapping
-    public List<Client> findAll(@RequestParam(required = false) String search) {
-        return service.findAll(search);
+    public PageResponse<Client> findAll(
+            @RequestParam(required = false) String name,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return service.findAll(name, page, size);
     }
 
     @GetMapping("/{id}")
@@ -30,7 +34,7 @@ public class ClientController {
     }
 
     @PutMapping("/{id}")
-    public Client update(@PathVariable Integer id, @Valid  @RequestBody Client client) {
+    public Client update(@PathVariable Integer id, @Valid @RequestBody Client client) {
         Client updatedClient = new Client(id, client.fullName());
         return service.save(updatedClient);
     }

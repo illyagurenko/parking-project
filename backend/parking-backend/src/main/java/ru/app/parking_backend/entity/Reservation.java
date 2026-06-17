@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotNull;
 
 import java.time.OffsetDateTime;
 
-public record Reservation (
+public record Reservation(
         Integer id,
         @NotNull(message = "Парковочное место обязательно") Integer parkingId,
         @NotNull(message = "Машина обязательна") Integer carId,

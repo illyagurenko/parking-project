@@ -4,6 +4,6 @@ public record CarDto (
         Integer id,
         String numberCar,
         Integer clientId,
-        String clientName
+        String fullName
 ){
 }
