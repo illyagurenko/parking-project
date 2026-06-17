@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import ru.app.parking_backend.entity.Client;
 import ru.app.parking_backend.exception.ResourceNotFoundException;
 import ru.app.parking_backend.repository.ClientRepository;
+import ru.app.parking_backend.repository.ReservationRepository;
 
 import java.util.List;
 
@@ -13,6 +14,7 @@ import java.util.List;
 public class ClientService {
 
     private final ClientRepository repository;
+    private final ReservationRepository reservationRepository;
 
     // эта функция возвращает всех клиентов или ищет по имени если есть параметр
     public List<Client> findAll(String name) {
@@ -37,6 +39,9 @@ public class ClientService {
     public void delete(Integer id) {
         if (!repository.existById(id)) {
             throw new ResourceNotFoundException("Клиент с id " + id + " не найден");
+        }
+        if(reservationRepository.hasActiveClient(id)){
+            throw new IllegalStateException("Невозможно удалить клиента: одна или несколько его машин находятся на парковке");
         }
         repository.delete(id);
     }

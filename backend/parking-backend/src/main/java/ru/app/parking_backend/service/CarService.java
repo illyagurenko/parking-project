@@ -5,6 +5,7 @@ import ru.app.parking_backend.dto.CarDto;
 import ru.app.parking_backend.entity.Car;
 import ru.app.parking_backend.exception.ResourceNotFoundException;
 import ru.app.parking_backend.repository.CarRepository;
+import ru.app.parking_backend.repository.ReservationRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -14,6 +15,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class CarService {
     private final CarRepository repository;
+    private final ReservationRepository reservationRepository;
 
     // возвращает список машин или ищет их по номеру
     public List<CarDto> findAll(String search) {
@@ -38,6 +40,9 @@ public class CarService {
     public void delete(Integer id) {
         if (!repository.existById(id)) {
             throw new ResourceNotFoundException("Машина с id " + id + " не найдена");
+        }
+        if(reservationRepository.hasActiveCar(id)){
+            throw new IllegalStateException("Невозможно удалить машину: она в данный момент находится на парковке");
         }
         repository.delete(id);
     }

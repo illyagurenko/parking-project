@@ -32,6 +32,16 @@ public class ReservationService {
         if (reservation.id() != null && !repository.existById(reservation.id())) {
             throw new ResourceNotFoundException("Бронь с id " + reservation.id() + " не найдена");
         }
+        if (reservation.id() == null) {
+
+            if (repository.hasActiveCar(reservation.carId())) {
+                throw new IllegalStateException("Этот автомобиль уже находится на парковке!");
+            }
+
+            if (repository.hasActiveSpace(reservation.parkingId())) {
+                throw new IllegalStateException("Это парковочное место уже занято другим автомобилем!");
+            }
+        }
         return repository.save(reservation);
     }
 

@@ -124,4 +124,40 @@ public class ReservationRepository {
         String sql = "SELECT EXISTS(SELECT 1 FROM reservations WHERE id = ?)";
         return Boolean.TRUE.equals(jdbc.queryForObject(sql, Boolean.class, id));
     }
+
+    // проверка для конкретной машины
+    public boolean hasActiveCar(Integer carId) {
+        String sql = """
+            SELECT EXISTS(
+                SELECT 1 FROM reservations 
+                WHERE car_id = ? 
+                AND (end_time IS NULL OR end_time > CURRENT_TIMESTAMP)
+            )
+        """;
+        return Boolean.TRUE.equals(jdbc.queryForObject(sql, Boolean.class, carId));
+    }
+
+    // проверка для клиента
+    public boolean hasActiveClient(Integer clientId) {
+        String sql = """
+            SELECT EXISTS(
+                SELECT 1 FROM reservations r
+                JOIN cars c ON r.car_id = c.id
+                WHERE c.client_id = ? 
+                AND (r.end_time IS NULL OR r.end_time > CURRENT_TIMESTAMP)
+            )
+        """;
+        return Boolean.TRUE.equals(jdbc.queryForObject(sql, Boolean.class, clientId));
+    }
+
+    public boolean hasActiveSpace(Integer parkingId) {
+        String sql = """
+        SELECT EXISTS(
+            SELECT 1 FROM reservations 
+            WHERE parking_id = ? 
+            AND (end_time IS NULL OR end_time > CURRENT_TIMESTAMP)
+        )
+    """;
+        return Boolean.TRUE.equals(jdbc.queryForObject(sql, Boolean.class, parkingId));
+    }
 }
