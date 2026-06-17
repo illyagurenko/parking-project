@@ -21,7 +21,7 @@ public class ClientController {
 
     @GetMapping("/{id}")
     public Client findById(@PathVariable Integer id) {
-        return service.findById(id).orElse(null);
+        return service.findById(id);
     }
 
     @PostMapping

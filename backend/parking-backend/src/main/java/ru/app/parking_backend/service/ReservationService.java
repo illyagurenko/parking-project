@@ -4,10 +4,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.app.parking_backend.dto.ReservationDto;
 import ru.app.parking_backend.entity.Reservation;
+import ru.app.parking_backend.exception.ResourceNotFoundException;
 import ru.app.parking_backend.repository.ReservationRepository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -23,15 +23,22 @@ public class ReservationService {
         return repository.findAll();
     }
 
-    public Optional<Reservation> findById(Integer id) {
-        return repository.findById(id);
+    public Reservation findById(Integer id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Бронь с id " + id + " не найдена"));
     }
 
     public Reservation save(Reservation reservation) {
+        if (reservation.id() != null && !repository.existById(reservation.id())) {
+            throw new ResourceNotFoundException("Бронь с id " + reservation.id() + " не найдена");
+        }
         return repository.save(reservation);
     }
 
     public void delete(Integer id) {
+        if (!repository.existById(id)) {
+            throw new ResourceNotFoundException("Бронь с id " + id + " не найдена");
+        }
         repository.delete(id);
     }
 }

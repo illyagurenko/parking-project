@@ -3,10 +3,10 @@ package ru.app.parking_backend.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.app.parking_backend.entity.Client;
+import ru.app.parking_backend.exception.ResourceNotFoundException;
 import ru.app.parking_backend.repository.ClientRepository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -22,15 +22,22 @@ public class ClientService {
         return repository.findAll();
     }
 
-    public Optional<Client> findById(Integer id) {
-        return repository.findById(id);
+    public Client findById(Integer id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Клиент с id " + id + " не найден"));
     }
 
     public Client save(Client client) {
+        if (client.id() != null && !repository.existById(client.id())) {
+            throw new ResourceNotFoundException("Клиент с id " + client.id() + " не найден");
+        }
         return repository.save(client);
     }
 
     public void delete(Integer id) {
+        if (!repository.existById(id)) {
+            throw new ResourceNotFoundException("Клиент с id " + id + " не найден");
+        }
         repository.delete(id);
     }
 }

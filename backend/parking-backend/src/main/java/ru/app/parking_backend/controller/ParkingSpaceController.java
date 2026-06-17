@@ -21,7 +21,7 @@ public class ParkingSpaceController {
 
     @GetMapping("/{id}")
     public ParkingSpace findById(@PathVariable Integer id) {
-        return service.findById(id).orElse(null);
+        return service.findById(id);
     }
 
     @PostMapping

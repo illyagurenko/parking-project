@@ -42,19 +42,13 @@ public class ClientRepository {
             );
             return new Client(newId, client.fullName());
         } else {
-            int rowsAffected = jdbc.update("UPDATE clients SET full_name = ? WHERE id = ?", client.fullName(), client.id());
-            if (rowsAffected == 0) {
-                throw new RuntimeException("Клиент с id " + client.id() + " не найден");
-            }
+            jdbc.update("UPDATE clients SET full_name = ? WHERE id = ?", client.fullName(), client.id());
             return client;
         }
     }
 
     public void delete(Integer id) {
-        int rowsAffected = jdbc.update("DELETE FROM clients WHERE id = ?", id);
-        if (rowsAffected == 0) {
-            throw new RuntimeException("Клиент с id " + id + " не найден");
-        }
+        jdbc.update("DELETE FROM clients WHERE id = ?", id);
     }
 
     public boolean existById(Integer id) {

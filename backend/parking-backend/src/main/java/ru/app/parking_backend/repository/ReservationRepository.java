@@ -100,7 +100,7 @@ public class ReservationRepository {
             );
             return new Reservation(newId, res.parkingId(), res.carId(), isPaid, startTime, res.endTime());
         } else {
-            int rowsAffected = jdbc.update(
+            jdbc.update(
                     "UPDATE reservations SET parking_id = ?, car_id = ?, is_paid = ?, start_time = ?, end_time = ? WHERE id = ?",
                     res.parkingId(),
                     res.carId(),
@@ -109,18 +109,12 @@ public class ReservationRepository {
                     res.endTime() != null ? Timestamp.from(res.endTime().toInstant()) : null,
                     res.id()
             );
-            if (rowsAffected == 0) {
-                throw new RuntimeException("Бронь с id " + res.id() + " не найдена");
-            }
             return res;
         }
     }
 
     public void delete(Integer id) {
-        int rowsAffected = jdbc.update("DELETE FROM reservations WHERE id = ?", id);
-        if (rowsAffected == 0) {
-            throw new RuntimeException("Бронь с id " + id + " не найдена");
-        }
+        jdbc.update("DELETE FROM reservations WHERE id = ?", id);
     }
 
     public boolean existById(Integer id) {

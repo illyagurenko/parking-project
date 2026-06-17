@@ -3,6 +3,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.app.parking_backend.dto.CarDto;
 import ru.app.parking_backend.entity.Car;
+import ru.app.parking_backend.exception.ResourceNotFoundException;
 import ru.app.parking_backend.repository.CarRepository;
 
 import java.util.List;
@@ -22,15 +23,22 @@ public class CarService {
         return repository.findAll();
     }
 
-    public Optional<Car> findById(Integer id) {
-        return repository.findById(id);
+    public Car findById(Integer id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Машина с id " + id + " не найдена"));
     }
 
     public Car save(Car car) {
+        if (car.id() != null && !repository.existById(car.id())) {
+            throw new ResourceNotFoundException("Машина с id " + car.id() + " не найдена");
+        }
         return repository.save(car);
     }
 
     public void delete(Integer id) {
+        if (!repository.existById(id)) {
+            throw new ResourceNotFoundException("Машина с id " + id + " не найдена");
+        }
         repository.delete(id);
     }
 }

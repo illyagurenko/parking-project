@@ -61,19 +61,13 @@ public class CarRepository {
             );
             return new Car(newId, car.numberCar(), car.clientId());
         } else {
-            int rowsAffected = jdbc.update("UPDATE cars SET number_car = ?, client_id = ? WHERE id = ?", car.numberCar(), car.clientId(), car.id());
-            if (rowsAffected == 0) {
-                throw new RuntimeException("Машина с id " + car.id() + " не найдена");
-            }
+            jdbc.update("UPDATE cars SET number_car = ?, client_id = ? WHERE id = ?", car.numberCar(), car.clientId(), car.id());
             return car;
         }
     }
 
     public void delete(Integer id) {
-        int rowsAffected = jdbc.update("DELETE FROM cars WHERE id = ?", id);
-        if (rowsAffected == 0) {
-            throw new RuntimeException("Машина с id " + id + " не найдена");
-        }
+        jdbc.update("DELETE FROM cars WHERE id = ?", id);
     }
 
     public boolean existById(Integer id) {

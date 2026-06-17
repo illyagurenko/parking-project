@@ -38,19 +38,13 @@ public class ParkingSpaceRepository {
             );
             return new ParkingSpace(newId, parkingSpace.numberSpace());
         } else {
-            int rowsAffected = jdbc.update("UPDATE parking_spaces SET number_space = ? WHERE id = ?", parkingSpace.numberSpace(), parkingSpace.id());
-            if (rowsAffected == 0) {
-                throw new RuntimeException("Парковочное место с id " + parkingSpace.id() + " не найдено");
-            }
+            jdbc.update("UPDATE parking_spaces SET number_space = ? WHERE id = ?", parkingSpace.numberSpace(), parkingSpace.id());
             return parkingSpace;
         }
     }
 
     public void delete(Integer id) {
-        int rowsAffected = jdbc.update("DELETE FROM parking_spaces WHERE id = ?", id);
-        if (rowsAffected == 0) {
-            throw new RuntimeException("Парковочное место с id " + id + " не найдено");
-        }
+        jdbc.update("DELETE FROM parking_spaces WHERE id = ?", id);
     }
 
     public boolean existById(Integer id) {
