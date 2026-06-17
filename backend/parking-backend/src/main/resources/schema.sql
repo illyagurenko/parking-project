@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS clients (
 CREATE TABLE IF NOT EXISTS cars (
     id SERIAL PRIMARY KEY,
     number_car VARCHAR(9) NOT NULL UNIQUE,
-    client_id INTEGER REFERENCES clients (id) ON DELETE SET NULL
+    client_id INTEGER REFERENCES clients (id) ON DELETE CASCADE
     );
 
 CREATE TABLE IF NOT EXISTS parking_spaces (
@@ -21,4 +21,4 @@ CREATE TABLE IF NOT EXISTS reservations (
     is_paid BOOLEAN DEFAULT FALSE,
     start_time TIMESTAMP WITH TIME ZONE NOT NULL,
     end_time TIMESTAMP WITH TIME ZONE
-                                                                                                  );
+        );

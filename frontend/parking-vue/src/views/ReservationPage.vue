@@ -94,7 +94,7 @@ onMounted(() => {
 
 const carOptions = computed(() => {
   return mgmtStore.cars.map(c => ({
-    label: `${c.numberCar} (${c.clientFullName || 'No owner'})`,
+    label: `${c.numberCar} (${c.clientName || 'No owner'})`,
     value: c.id
   }))
 })
@@ -112,10 +112,15 @@ const resForm = ref({ id: null, parkingId: null as number | null, carId: null as
 const openDialog = (res?: any) => {
   if (res) {
     editing.value = true
+
+
+
     resForm.value = { 
       ...res, 
       endTimeLocal: res.endTime ? new Date(res.endTime).toISOString().slice(0,16) : ''
     }
+
+
   } else {
     editing.value = false
     resForm.value = { id: null, parkingId: mgmtStore.parkingSpaces[0]?.id || null, carId: mgmtStore.cars[0]?.id || null, isPaid: false, endTimeLocal: '' }

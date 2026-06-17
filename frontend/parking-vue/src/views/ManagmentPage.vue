@@ -35,7 +35,7 @@
         </div>
         <DataTable :value="store.cars" class="p-datatable-sm" responsiveLayout="scroll" paginator :rows="10">          <Column field="id" header="ID"></Column>
           <Column field="numberCar" header="Number"></Column>
-          <Column field="clientFullName" header="Owner"></Column>
+          <Column field="clientName" header="Owner"></Column>
           <Column header="Actions">
             <template #body="slotProps">
               <Button icon="pi pi-pencil" class="p-button-text p-button-sm" @click="openCarDialog(slotProps.data)" />
