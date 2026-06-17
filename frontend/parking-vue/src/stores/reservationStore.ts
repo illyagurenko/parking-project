@@ -17,33 +17,58 @@ export const useReservationStore = defineStore('reservation', {
       if (page !== undefined) this.page = page
       if (size !== undefined) this.size = size
 
-      const res = await api.get('/reservations', {
-        params: {
-          carNumber: this.carSearch,
-          clientFullName: this.clientSearch,
-          page: this.page,
-          size: this.size
-        }
-      })
-      this.reservations = res.data.content
-      this.totalReservations = res.data.totalElements
+      try {
+        const res = await api.get('/reservations', {
+          params: {
+            carNumber: this.carSearch,
+            clientFullName: this.clientSearch,
+            page: this.page,
+            size: this.size
+          }
+        })
+        this.reservations = res.data.content
+        this.totalReservations = res.data.totalElements
+      } catch (error: any) {
+        console.error('Не удалось загрузить бронирования', error)
+      }
     },
     async addReservation(reservation: any) {
-      await api.post('/reservations', reservation)
-      this.fetchReservations()
+      try {
+        await api.post('/reservations', reservation)
+        this.fetchReservations()
+      } catch (error: any) {
+        console.error('Не удалось создать бронирование', error)
+      }
     },
     async updateReservation(id: number, reservation: any) {
-      await api.put(`/reservations/${id}`, reservation)
-      this.fetchReservations()
+      try {
+        await api.put(`/reservations/${id}`, reservation)
+        this.fetchReservations()
+      } catch (error: any) {
+        console.error('Не удалось обновить бронирование', error)
+      }
     },
     async deleteReservation(id: number) {
-      await api.delete(`/reservations/${id}`)
-      this.fetchReservations()
+      try {
+        await api.delete(`/reservations/${id}`)
+        this.fetchReservations()
+      } catch (error: any) {
+        console.error('Не удалось удалить бронирование', error)
+      }
     },
     async togglePayment(id: number, reservation: any) {
-      reservation.isPaid = !reservation.isPaid
-      await api.put(`/reservations/${id}`, reservation)
-      this.fetchReservations()
+      // Сохраняем исходное состояние на случай ошибки бэкенда
+      const originalPaidStatus = reservation.isPaid
+      
+      try {
+        reservation.isPaid = !reservation.isPaid
+        await api.put(`/reservations/${id}`, reservation)
+        this.fetchReservations()
+      } catch (error: any) {
+        // Возвращаем исходный статус, если бэкенд отклонил запрос
+        reservation.isPaid = originalPaidStatus
+        console.error('Не удалось обновить статус оплаты', error)
+      }
     }
   }
 })

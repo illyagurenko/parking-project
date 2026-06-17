@@ -67,7 +67,11 @@
       </div>
       <div class="field">
         <label>End Time (optional to release)</label>
-        <input type="datetime-local" v-model="resForm.endTimeLocal" style="padding:0.5rem; width:100%; border:1px solid #ccc; border-radius:4px" />
+        <input 
+        type="datetime-local" 
+        v-model="resForm.endTimeLocal" 
+        :min="new Date().toISOString().slice(0, 16)" 
+        style="padding:0.5rem; width:100%; border:1px solid #ccc; border-radius:4px" />
       </div>
       <template #footer>
         <Button label="Cancel" icon="pi pi-times" class="p-button-text" @click="resDialog = false" />
@@ -141,6 +145,10 @@ const openDialog = (res?: any) => {
 }
 
 const saveRes = () => {
+  if (resForm.value.endTimeLocal && new Date(resForm.value.endTimeLocal) < new Date()) {
+    return alert('End time cannot be in the past!')
+  }
+
   const payload = {
     ...resForm.value,
     endTime: resForm.value.endTimeLocal ? new Date(resForm.value.endTimeLocal).toISOString() : null
