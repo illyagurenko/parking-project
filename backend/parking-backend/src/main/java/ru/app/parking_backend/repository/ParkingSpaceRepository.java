@@ -19,11 +19,13 @@ public class ParkingSpaceRepository {
             rs.getString("number_space")
     );
 
+    // место по id
     public Optional<ParkingSpace> findById(Integer id) {
         List<ParkingSpace> spaces = jdbc.query("SELECT * FROM parking_spaces WHERE id = ?", rowMapper, id);
         return spaces.stream().findFirst();
     }
 
+    // сохранение+обновление
     public ParkingSpace save(ParkingSpace parkingSpace) {
         if (parkingSpace.id() == null) {
             // делаем вставку и сразу возвращаем сгенерированный id через postgresql RETURNING id
@@ -39,10 +41,12 @@ public class ParkingSpaceRepository {
         }
     }
 
+    // удаление
     public void delete(Integer id) {
         jdbc.update("DELETE FROM parking_spaces WHERE id = ?", id);
     }
 
+    //существует ли сущность+если npe метод не упадет
     public boolean existById(Integer id) {
         if (id == null) {
             return false;

@@ -16,6 +16,7 @@
 </template>
 
 <script setup lang="ts">
+// RouterLink - аналоги href RouterView - отображает компоненты
 import { RouterLink, RouterView } from 'vue-router'
 </script>
 

@@ -2,6 +2,7 @@ package ru.app.parking_backend.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.app.parking_backend.dto.PageResponse;
 import ru.app.parking_backend.dto.ReservationDto;
 import ru.app.parking_backend.entity.Reservation;
@@ -12,15 +13,19 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class ReservationService {
 
     private final ReservationRepository repository;
 
+    //отправляет нужный кусок бд
     public PageResponse<ReservationDto> findAll(String carNumber, String clientFullName, int page, int size) {
+        // параметры пагинации
         if (page < 0) page = 0;
         if (size < 10) size = 10;
         if (size > 100) size = 100;
 
+        // расчет сколько записей пропустить
         int offset = page * size;
 
         List<ReservationDto> content;
@@ -29,6 +34,7 @@ public class ReservationService {
         boolean hasCarFilter = carNumber != null && !carNumber.trim().isEmpty();
         boolean hasClientFilter = clientFullName != null && !clientFullName.trim().isEmpty();
 
+        //с фильтрами
         if (hasCarFilter || hasClientFilter) {
             String cleanCar = hasCarFilter ? carNumber.trim() : null;
             String cleanClient = hasClientFilter ? clientFullName.trim() : null;
@@ -40,6 +46,7 @@ public class ReservationService {
             totalElements = repository.countAll();
         }
 
+        //всего стр
         int totalPages = (int) Math.ceil((double) totalElements / size);
 
         return new PageResponse<>(

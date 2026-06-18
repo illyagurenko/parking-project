@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { api } from './api'
 
 export const useManagementStore = defineStore('management', {
+  //state - переменные, массивы для сущностей в таблицы, данные для пагинации и фильтрации
   state: () => ({
     clients: [] as any[],
     totalClients: 0,
@@ -26,170 +27,117 @@ export const useManagementStore = defineStore('management', {
     parkingSpacesOptions: [] as any[]
   }),
   actions: {
+    // для выпадающих списков при создании сущностей
     async fetchClientsOptions() {
-      try {
-        const res = await api.get('/clients', { params: { size: 100 } })
-        this.clientsOptions = res.data.content
-      } catch (error: any) {
-        console.error('Ошибка загрузки списка клиентов:', error)
-      }
+      const res = await api.get('/clients', { params: { size: 100 } })
+      this.clientsOptions = res.data.content
     },
     async fetchCarsOptions() {
-      try {
-        const res = await api.get('/cars', { params: { size: 100 } })
-        this.carsOptions = res.data.content
-      } catch (error: any) {
-        console.error('Ошибка загрузки списка машин:', error)
-      }
+      const res = await api.get('/cars', { params: { size: 100 } })
+      this.carsOptions = res.data.content
     },
     async fetchParkingSpacesOptions() {
-      try {
-        const res = await api.get('/parking-spaces', { params: { size: 100 } })
-        this.parkingSpacesOptions = res.data.content
-      } catch (error: any) {
-        console.error('Ошибка загрузки списка парковочных мест:', error)
-      }
+      const res = await api.get('/parking-spaces', { params: { size: 100 } })
+      this.parkingSpacesOptions = res.data.content
     },
 
+    //основная таблица клиентов
     async fetchClients(search?: string, page?: number, size?: number) {
       if (search !== undefined) this.clientsSearch = search
       if (page !== undefined) this.clientsPage = page
       if (size !== undefined) this.clientsSize = size
 
-      try {
-        const res = await api.get('/clients', {
-          params: {
-            name: this.clientsSearch,
-            page: this.clientsPage,
-            size: this.clientsSize
-          }
-        })
-        this.clients = res.data.content
-        this.totalClients = res.data.totalElements
-      } catch (error: any) {
-        console.error('Не удалось загрузить клиентов', error)
-      }
+      const res = await api.get('/clients', {
+        params: {
+          name: this.clientsSearch,
+          page: this.clientsPage,
+          size: this.clientsSize
+        }
+      })
+      this.clients = res.data.content
+      this.totalClients = res.data.totalElements
     },
+    //crud с клиентами + обновление
     async addClient(client: any) {
-      try {
-        await api.post('/clients', client)
-        this.fetchClients()
-        this.fetchClientsOptions()
-      } catch (error: any) {
-        console.error('Не удалось добавить клиента', error)
-      }
+      await api.post('/clients', client)
+      this.fetchClients()
+      this.fetchClientsOptions()
     },
     async updateClient(id: number, client: any) {
-      try {
-        await api.put(`/clients/${id}`, client)
-        this.fetchClients()
-        this.fetchClientsOptions()
-      } catch (error: any) {
-        console.error('Не удалось обновить клиента', error)
-      }
+      await api.put(`/clients/${id}`, client)
+      this.fetchClients()
+      this.fetchClientsOptions()
     },
     async deleteClient(id: number) {
-      try {
-        await api.delete(`/clients/${id}`)
-        this.fetchClients()
-        this.fetchClientsOptions()
-      } catch (error: any) {
-        console.error('Не удалось удалить клиента', error)
-      }
+      await api.delete(`/clients/${id}`)
+      this.fetchClients()
+      this.fetchClientsOptions()
     },
 
+    //основная таблица машин
     async fetchCars(search?: string, page?: number, size?: number) {
       if (search !== undefined) this.carsSearch = search
       if (page !== undefined) this.carsPage = page
       if (size !== undefined) this.carsSize = size
 
-      try {
-        const res = await api.get('/cars', {
-          params: {
-            search: this.carsSearch,
-            page: this.carsPage,
-            size: this.carsSize
-          }
-        })
-        this.cars = res.data.content
-        this.totalCars = res.data.totalElements
-      } catch (error: any) {
-        console.error('Не удалось загрузить автомобили', error)
-      }
+      const res = await api.get('/cars', {
+        params: {
+          search: this.carsSearch,
+          page: this.carsPage,
+          size: this.carsSize
+        }
+      })
+      this.cars = res.data.content
+      this.totalCars = res.data.totalElements
     },
+    //crud с машинами + обновление
     async addCar(car: any) {
-      try {
-        await api.post('/cars', car)
-        this.fetchCars()
-        this.fetchCarsOptions()
-      } catch (error: any) {
-        console.error('Не удалось добавить автомобиль', error)
-      }
+      await api.post('/cars', car)
+      this.fetchCars()
+      this.fetchCarsOptions()
     },
     async updateCar(id: number, car: any) {
-      try {
-        await api.put(`/cars/${id}`, car)
-        this.fetchCars()
-        this.fetchCarsOptions()
-      } catch (error: any) {
-        console.error('Не удалось обновить автомобиль', error)
-      }
+      await api.put(`/cars/${id}`, car)
+      this.fetchCars()
+      this.fetchCarsOptions()
     },
     async deleteCar(id: number) {
-      try {
-        await api.delete(`/cars/${id}`)
-        this.fetchCars()
-        this.fetchCarsOptions()
-      } catch (error: any) {
-        console.error('Не удалось удалить автомобиль', error)
-      }
+      await api.delete(`/cars/${id}`)
+      this.fetchCars()
+      this.fetchCarsOptions()
     },
 
+    //основная таблица мест
     async fetchParkingSpaces(search?: string, page?: number, size?: number) {
       if (search !== undefined) this.parkingSpacesSearch = search
       if (page !== undefined) this.parkingSpacesPage = page
       if (size !== undefined) this.parkingSpacesSize = size
 
-      try {
-        const res = await api.get('/parking-spaces', {
-          params: {
-            search: this.parkingSpacesSearch,
-            page: this.parkingSpacesPage,
-            size: this.parkingSpacesSize
-          }
-        })
-        this.parkingSpaces = res.data.content
-        this.totalParkingSpaces = res.data.totalElements
-      } catch (error: any) {
-        console.error('Не удалось загрузить парковочные места', error)
-      }
+      const res = await api.get('/parking-spaces', {
+        params: {
+          search: this.parkingSpacesSearch,
+          page: this.parkingSpacesPage,
+          size: this.parkingSpacesSize
+        }
+      })
+      this.parkingSpaces = res.data.content
+      this.totalParkingSpaces = res.data.totalElements
     },
+    //crud с клиентами + обновление
     async addParkingSpace(space: any) {
-      try {
-        await api.post('/parking-spaces', space)
-        this.fetchParkingSpaces()
-        this.fetchParkingSpacesOptions()
-      } catch (error: any) {
-        console.error('Не удалось добавить парковочное место', error)
-      }
+      await api.post('/parking-spaces', space)
+      this.fetchParkingSpaces()
+      this.fetchParkingSpacesOptions()
     },
     async updateParkingSpace(id: number, space: any) {
-      try {
-        await api.put(`/parking-spaces/${id}`, space)
-        this.fetchParkingSpaces()
-        this.fetchParkingSpacesOptions()
-      } catch (error: any) {
-        console.error('Не удалось обновить парковочное место', error)
-      }
+      await api.put(`/parking-spaces/${id}`, space)
+      this.fetchParkingSpaces()
+      this.fetchParkingSpacesOptions()
     },
     async deleteParkingSpace(id: number) {
-      try {
-        await api.delete(`/parking-spaces/${id}`)
-        this.fetchParkingSpaces()
-        this.fetchParkingSpacesOptions()
-      } catch (error: any) {
-        console.error('Не удалось удалить парковочное место', error)
-      }
+      await api.delete(`/parking-spaces/${id}`)
+      this.fetchParkingSpaces()
+      this.fetchParkingSpacesOptions()
     }
   }
 })

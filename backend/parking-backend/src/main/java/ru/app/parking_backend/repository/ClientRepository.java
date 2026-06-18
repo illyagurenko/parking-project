@@ -19,23 +19,13 @@ public class ClientRepository {
             rs.getString("full_name")
     );
 
+    // клиент по id
     public Optional<Client> findById(Integer id) {
         List<Client> clients = jdbc.query("SELECT * FROM clients WHERE id = ?", rowMapper, id);
         return clients.stream().findFirst();
     }
 
-    public List<Client> searchByNamePaginated(String name, int limit, int offset) {
-        String sql = "SELECT * FROM clients WHERE full_name ILIKE ? ORDER BY id DESC LIMIT ? OFFSET ?";
-        return jdbc.query(sql, rowMapper, "%" + name + "%", limit, offset);
-    }
-
-    // Подсчет количества найденных по имени для п вычисления страниц поиска
-    public long countByName(String name) {
-        String sql = "SELECT COUNT(*) FROM clients WHERE full_name ILIKE ?";
-        Long count = jdbc.queryForObject(sql, Long.class, "%" + name + "%");
-        return count != null ? count : 0L;
-    }
-
+    // сохранение+обновление
     public Client save(Client client) {
         if (client.id() == null) {
             // делаем вставку и сразу возвращаем сгенерированный id через postgresql RETURNING id
@@ -55,6 +45,7 @@ public class ClientRepository {
         jdbc.update("DELETE FROM clients WHERE id = ?", id);
     }
 
+    //существует ли сущность+если npe метод не упадет
     public boolean existById(Integer id) {
         if (id == null) {
             return false;
@@ -63,10 +54,23 @@ public class ClientRepository {
         return Boolean.TRUE.equals(jdbc.queryForObject(sql, Boolean.class, id));
     }
 
-    // метод для получения страницы
+    // постраничный вывод всех клиентов
     public List<Client> findAllPaginated(int limit, int offset) {
         String sql = "SELECT * FROM clients ORDER BY id DESC LIMIT ? OFFSET ?";
         return jdbc.query(sql, rowMapper, limit, offset);
+    }
+
+    // постраничный поиск по имени
+    public List<Client> searchByNamePaginated(String name, int limit, int offset) {
+        String sql = "SELECT * FROM clients WHERE full_name ILIKE ? ORDER BY id DESC LIMIT ? OFFSET ?";
+        return jdbc.query(sql, rowMapper, "%" + name + "%", limit, offset);
+    }
+
+    // Подсчет количества найденных по имени для вычисления страниц поиска
+    public long countByName(String name) {
+        String sql = "SELECT COUNT(*) FROM clients WHERE full_name ILIKE ?";
+        Long count = jdbc.queryForObject(sql, Long.class, "%" + name + "%");
+        return count != null ? count : 0L;
     }
 
     // метод для подсчета всех записей

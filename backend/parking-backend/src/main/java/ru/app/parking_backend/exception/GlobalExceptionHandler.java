@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    //не найдена сущность
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleNotFoundException(Exception ex) {
         ErrorResponse error = new ErrorResponse(
@@ -25,6 +26,7 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
     }
 
+    //нельзя удалить
     @ExceptionHandler({IllegalArgumentException.class, IllegalStateException.class})
     public ResponseEntity<ErrorResponse> handleBadRequestException(Exception ex) {
         ErrorResponse error = new ErrorResponse(
@@ -33,8 +35,7 @@ public class GlobalExceptionHandler {
         );
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
-
-
+    //непредвиденная
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGlobalException(Exception ex) {
 
@@ -45,6 +46,7 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    //невалидные данные с фронтенда
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidationException(MethodArgumentNotValidException ex) {
         String errorMessage = ex.getBindingResult()
@@ -60,6 +62,7 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 
+    //нарушения ключа уник
     @ExceptionHandler({DuplicateKeyException.class, DataIntegrityViolationException.class})
     public ResponseEntity<ErrorResponse> handleDuplicateKeyException() {
         ErrorResponse error = new ErrorResponse(

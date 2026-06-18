@@ -56,6 +56,7 @@ public class CarRepository {
         jdbc.update("DELETE FROM cars WHERE id = ?", id);
     }
 
+    //существует ли сущность+если npe метод не упадет
     public boolean existById(Integer id) {
         if (id == null) {
             return false;

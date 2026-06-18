@@ -150,21 +150,18 @@ import Select from 'primevue/select'
 
 const store = useManagementStore()
 
-const clientSearch = ref('')
+// поиск по иашине в форму=>при клике fetchCars
 const carSearch = ref('')
 
+//хук жизненного цикла, который срабатывает, когда компонент только появился\отрисовался и потом делает запросы
 onMounted(() => {
+  //основные таблицы
   store.fetchClients()
   store.fetchCars()
   store.fetchParkingSpaces()
-  
-  // Загружаем списки для выпадающих меню
+  // клиенты в выпадающем окне для машины
   store.fetchClientsOptions()
 })
-
-// Поиск сбрасывает страницу на 0
-const fetchClients = () => store.fetchClients(clientSearch.value, 0, store.clientsSize)
-const fetchCars = () => store.fetchCars(carSearch.value, 0, store.carsSize)
 
 // Обработчики пагинации
 const onClientPage = (event: any) => {
@@ -179,16 +176,27 @@ const onSpacePage = (event: any) => {
   store.fetchParkingSpaces('', event.page, event.rows)
 }
 
-// Client Logic
+//clients logic
+// поиск по имени в форму=>при клике fetchClients
+const clientSearch = ref('')
+
+// делаем запрос с параметром из формы и переходим на 0 страницу
+const fetchClients = () => store.fetchClients(clientSearch.value, 0, store.clientsSize)
+//поакзывать окно
 const clientDialog = ref(false)
+//редактировать
 const editingClient = ref(false)
+//форма
 const clientForm = ref({ id: null, fullName: '' })
 
 const openClientDialog = (client?: any) => {
+  //если нажали редактировать
   if (client) {
+    //флаг и копируем текущего в форму
     editingClient.value = true
     clientForm.value = { ...client }
   } else {
+    //если добавить флаг и заполняем форму
     editingClient.value = false
     clientForm.value = { id: null, fullName: '' }
   }
@@ -196,8 +204,10 @@ const openClientDialog = (client?: any) => {
 }
 
 const saveClient = () => {
+  //обновляем
   if (editingClient.value) {
     store.updateClient(clientForm.value.id!, clientForm.value)
+    //добавляем
   } else {
     store.addClient(clientForm.value)
   }
@@ -209,15 +219,25 @@ const deleteClient = (id: number) => {
 }
 
 // Car Logic
+
+// делаем запрос с параметром из формы и переходим на 0 страницу
+const fetchCars = () => store.fetchCars(carSearch.value, 0, store.carsSize)
+
+//открыт ли диалог
 const carDialog = ref(false)
+//редактировать
 const editingCar = ref(false)
+//форма
 const carForm = ref({ id: null, numberCar: '', clientId: null })
 
 const openCarDialog = (car?: any) => {
+  //если редактировать
   if (car) {
+    //флаг и копируем в форму
     editingCar.value = true
     carForm.value = { ...car }
   } else {
+    //добавляем
     editingCar.value = false
     carForm.value = { id: null, numberCar: '', clientId: null }
   }
@@ -225,9 +245,11 @@ const openCarDialog = (car?: any) => {
 }
 
 const saveCar = () => {
+  //обновляем
   if (editingCar.value) {
     store.updateCar(carForm.value.id!, carForm.value)
   } else {
+    //сохраняем
     store.addCar(carForm.value)
   }
   carDialog.value = false
@@ -238,24 +260,33 @@ const deleteCar = (id: number) => {
 }
 
 // Space Logic
+
+//открыта ли форма
 const spaceDialog = ref(false)
+//редактировать
 const editingSpace = ref(false)
+//форма
 const spaceForm = ref({ id: null, numberSpace: 'N_' })
 
 const openSpaceDialog = (space?: any) => {
+  //обновить
   if (space) {
+    //флаг и скопировать в форму текущее место
     editingSpace.value = true
     spaceForm.value = { ...space }
   } else {
+    //создать
     editingSpace.value = false
     spaceForm.value = { id: null, numberSpace: 'N_' }
   }
   spaceDialog.value = true
 }
 const saveSpace = () => {
+   //обновляем
   if (editingSpace.value) {
     store.updateParkingSpace(spaceForm.value.id!, spaceForm.value)
   } else {
+    //сохр
     store.addParkingSpace(spaceForm.value)
   }
   spaceDialog.value = false

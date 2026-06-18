@@ -18,6 +18,7 @@ import java.util.Optional;
 public class ReservationRepository {
     private final JdbcTemplate jdbc;
 
+    // маппер сущности
     private final RowMapper<Reservation> rowMapper = (rs, rowNum) -> {
         Timestamp startTs = rs.getTimestamp("start_time");
         Timestamp endTs = rs.getTimestamp("end_time");
@@ -31,6 +32,7 @@ public class ReservationRepository {
         );
     };
 
+    // маппер dto
     private final RowMapper<ReservationDto> dtoMapper = (rs, rowNum) -> {
         Timestamp startTs = rs.getTimestamp("start_time");
         Timestamp endTs = rs.getTimestamp("end_time");
@@ -48,12 +50,13 @@ public class ReservationRepository {
         );
     };
 
+    // бронь по id
     public Optional<Reservation> findById(Integer id) {
         List<Reservation> list = jdbc.query("SELECT * FROM reservations WHERE id = ?", rowMapper, id);
         return list.stream().findFirst();
     }
 
-    // сохраняет бронь
+    // сохранение+обновление
     public Reservation save(Reservation res) {
         if (res.id() == null) {
             OffsetDateTime startTime = res.startTime() != null ? res.startTime() : OffsetDateTime.now(ZoneId.systemDefault());
@@ -83,10 +86,12 @@ public class ReservationRepository {
         }
     }
 
+    // удаление
     public void delete(Integer id) {
         jdbc.update("DELETE FROM reservations WHERE id = ?", id);
     }
 
+    //существует ли сущность+если npe метод не упадет
     public boolean existById(Integer id) {
         if (id == null) {
             return false;
@@ -95,7 +100,7 @@ public class ReservationRepository {
         return Boolean.TRUE.equals(jdbc.queryForObject(sql, Boolean.class, id));
     }
 
-    // проверка для конкретной машины
+    // проверка есть ли машина в брони
     public boolean hasActiveCar(Integer carId) {
         String sql = """
                     SELECT EXISTS(
@@ -107,7 +112,7 @@ public class ReservationRepository {
         return Boolean.TRUE.equals(jdbc.queryForObject(sql, Boolean.class, carId));
     }
 
-    // проверка для клиента
+    // есть ли машина клиента в брони
     public boolean hasActiveClient(Integer clientId) {
         String sql = """
                     SELECT EXISTS(
@@ -120,6 +125,7 @@ public class ReservationRepository {
         return Boolean.TRUE.equals(jdbc.queryForObject(sql, Boolean.class, clientId));
     }
 
+    // есть ли место в брони
     public boolean hasActiveSpace(Integer parkingId) {
         String sql = """
                     SELECT EXISTS(
@@ -131,6 +137,7 @@ public class ReservationRepository {
         return Boolean.TRUE.equals(jdbc.queryForObject(sql, Boolean.class, parkingId));
     }
 
+    // постраничный вывод всех броней
     public List<ReservationDto> findAllPaginated(int limit, int offset) {
         String sql = """
                             SELECT r.id, r.car_id, r.parking_id, r.start_time, r.end_time, r.is_paid,\s
@@ -152,7 +159,7 @@ public class ReservationRepository {
         return count != null ? count : 0L;
     }
 
-    // постраничный гибкий поиск по двум фильтрам (можно заполнить только один или оба)
+    // постраничный поиск брони по номеру или имени
     public List<ReservationDto> searchPaginated(String carNumber, String clientFullName, int limit, int offset) {
         String sql = """
                     SELECT r.id, r.car_id, r.parking_id, r.start_time, r.end_time, r.is_paid,\s 

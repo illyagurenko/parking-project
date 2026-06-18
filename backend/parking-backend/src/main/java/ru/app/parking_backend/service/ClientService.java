@@ -2,6 +2,7 @@ package ru.app.parking_backend.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.app.parking_backend.dto.PageResponse;
 import ru.app.parking_backend.entity.Client;
 import ru.app.parking_backend.exception.ResourceNotFoundException;
@@ -12,22 +13,26 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class ClientService {
 
     private final ClientRepository repository;
     private final ReservationRepository reservationRepository;
 
+    //отправляет нужный кусок бд
     public PageResponse<Client> findAll(String name, int page, int size) {
         // параметры пагинации
         if (page < 0) page = 0;
         if (size < 10) size = 10;
         if (size > 100) size = 100;
 
+        // расчет сколько записей пропустить
         int offset = page * size;
 
         List<Client> content;
         long totalElements;
 
+        //с фильтром
         if (name != null && !name.trim().isEmpty()) {
             String searchPattern = name.trim();
             content = repository.searchByNamePaginated(searchPattern, size, offset);
@@ -37,6 +42,7 @@ public class ClientService {
             totalElements = repository.countAll();
         }
 
+        //всего стр
         int totalPages = (int) Math.ceil((double) totalElements / size);
 
         return new PageResponse<>(

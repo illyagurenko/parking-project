@@ -92,18 +92,24 @@ import InputText from 'primevue/inputtext'
 import Dialog from 'primevue/dialog'
 import Select from 'primevue/select'
 
+//стор со всеми сущностями
 const store = useReservationStore()
+//стор с бронью
 const mgmtStore = useManagementStore()
 
+//переменные для поиска с фильтрами
 const carSearch = ref('')
 const clientSearch = ref('')
 
+//при отрисовки страницы этот хук выполняет вопросы
 onMounted(() => {
   store.fetchReservations()
+  //выпадающие машин и мест
   mgmtStore.fetchParkingSpacesOptions()
   mgmtStore.fetchCarsOptions()
 })
 
+//из таблицы для выпадающего окна берем авто+владельца
 const carOptions = computed(() => {
   return mgmtStore.carsOptions.map(c => ({
     label: `${c.numberCar} (${c.fullName || 'No owner'})`,
@@ -111,27 +117,25 @@ const carOptions = computed(() => {
   }))
 })
 
-// При вводе сбрасываем страницу на 0
-const fetchReservations = () => {
-  store.fetchReservations(carSearch.value, clientSearch.value, 0, store.size)
-}
-
-const onPage = (event: any) => {
-  store.fetchReservations(carSearch.value, clientSearch.value, event.page, event.rows)
-}
-
+//открыто лиокно
 const resDialog = ref(false)
+//редактировать?
 const editing = ref(false)
+//форма
 const resForm = ref({ id: null, parkingId: null as number | null, carId: null as number | null, isPaid: false, endTimeLocal: '' })
 
 const openDialog = (res?: any) => {
+  //если редактировать
   if (res) {
+    //ставим флаг
     editing.value = true
+    //копируем все и смотрим чтоб время не налл
     resForm.value = { 
       ...res, 
       endTimeLocal: res.endTime ? new Date(res.endTime).toISOString().slice(0,16) : ''
     }
   } else {
+    //иначе сохраняем
     editing.value = false
     resForm.value = { 
       id: null, 
@@ -145,28 +149,41 @@ const openDialog = (res?: any) => {
 }
 
 const saveRes = () => {
+  // смотрим чтоб время не было позже текущего
   if (resForm.value.endTimeLocal && new Date(resForm.value.endTimeLocal) < new Date()) {
     return alert('End time cannot be in the past')
   }
 
   const payload = {
     ...resForm.value,
+    //приводим время к джава виду
     endTime: resForm.value.endTimeLocal ? new Date(resForm.value.endTimeLocal).toISOString() : null
   }
+  //обновить
   if (editing.value) {
     store.updateReservation(payload.id!, payload)
   } else {
+    //create
     store.addReservation(payload)
   }
   resDialog.value = false
 }
-
+//delete
 const deleteRes = (id: number) => {
   if(confirm('Are you sure?')) store.deleteReservation(id)
 }
-
+//обновить флаг оплаты
 const togglePayment = (res: any) => {
   store.togglePayment(res.id, res)
+}
+
+//при поиске с фильтром перебрасывать на 0 стр
+const fetchReservations = () => {
+  store.fetchReservations(carSearch.value, clientSearch.value, 0, store.size)
+}
+// настройка пагинации
+const onPage = (event: any) => {
+  store.fetchReservations(carSearch.value, clientSearch.value, event.page, event.rows)
 }
 
 </script>
