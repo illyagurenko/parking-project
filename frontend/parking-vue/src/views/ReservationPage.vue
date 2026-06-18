@@ -106,7 +106,7 @@ onMounted(() => {
 
 const carOptions = computed(() => {
   return mgmtStore.carsOptions.map(c => ({
-    label: `${c.numberCar} (${c.clientName || 'No owner'})`,
+    label: `${c.numberCar} (${c.fullName || 'No owner'})`,
     value: c.id
   }))
 })
@@ -146,7 +146,7 @@ const openDialog = (res?: any) => {
 
 const saveRes = () => {
   if (resForm.value.endTimeLocal && new Date(resForm.value.endTimeLocal) < new Date()) {
-    return alert('End time cannot be in the past!')
+    return alert('End time cannot be in the past')
   }
 
   const payload = {

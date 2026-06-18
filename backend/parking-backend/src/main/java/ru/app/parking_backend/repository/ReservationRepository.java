@@ -155,14 +155,14 @@ public class ReservationRepository {
     // постраничный гибкий поиск по двум фильтрам (можно заполнить только один или оба)
     public List<ReservationDto> searchPaginated(String carNumber, String clientFullName, int limit, int offset) {
         String sql = """
-                    SELECT r.id, r.car_id, r.parking_id r.start_time, r.end_time, r.is_paid, 
+                    SELECT r.id, r.car_id, r.parking_id, r.start_time, r.end_time, r.is_paid,\s 
                            c.number_car, c.client_id, cl.full_name, p.number_space
                     FROM reservations r
                     JOIN cars c ON r.car_id = c.id
                     JOIN clients cl ON c.client_id = cl.id
                     JOIN parking_spaces p ON r.parking_id = p.id
-                    WHERE (? IS NULL OR c.number_car ILIKE ?)
-                      AND (? IS NULL OR cl.full_name ILIKE ?)
+                    WHERE (?::text IS NULL OR c.number_car ILIKE ?)
+                      AND (?::text IS NULL OR cl.full_name ILIKE ?)
                     ORDER BY r.id DESC 
                     LIMIT ? OFFSET ?
                 """;
@@ -184,8 +184,8 @@ public class ReservationRepository {
                     FROM reservations r
                     JOIN cars c ON r.car_id = c.id
                     JOIN clients cl ON c.client_id = cl.id
-                    WHERE (? IS NULL OR c.number_car ILIKE ?)
-                      AND (? IS NULL OR cl.full_name ILIKE ?)
+                    WHERE (?::text IS NULL OR c.number_car ILIKE ?)
+                      AND (?::text IS NULL OR cl.full_name ILIKE ?)
                 """;
 
         String carPattern = carNumber != null ? "%" + carNumber + "%" : null;
